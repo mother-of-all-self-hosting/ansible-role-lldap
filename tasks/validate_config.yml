@@ -1,0 +1,81 @@
+# SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
+# SPDX-FileCopyrightText: 2023 MASH project contributors
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Fail if required Kutt settings not defined
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`).
+  when: "lookup('vars', item, default='') | string | length == 0"
+  with_items:
+    - kutt_uid
+    - kutt_gid
+    - kutt_hostname
+    - kutt_path_prefix
+    - kutt_container_network
+    - kutt_environment_variables_jwt_secret
+
+- name: Fail if Kutt database driver option is invalid
+  ansible.builtin.fail:
+    msg: >-
+      kutt_database_type must be 'better-sqlite3', 'sqlite3', 'mysql2', 'pg', or 'pg-native'. Since 'sqlite3' and 'pg-native' are not installed by default, you need to install them beforehand to use them.
+  when: "kutt_database_type not in ['better-sqlite3', 'sqlite3', 'mysql2', 'pg', 'pg-native']"
+
+- name: Fail if required Kutt + MySQL2 integration settings not defined
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) when `kutt_database_type` is `mysql2`
+  when: "kutt_database_type == 'mysql2' and lookup('vars', item, default='') | string | length == 0"
+  with_items:
+    - kutt_database_mysql_hostname
+    - kutt_database_mysql_password
+
+- name: Fail if required Kutt + pg integration settings not defined
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) when `kutt_database_type` is `pg`
+  when: "kutt_database_type == 'pg' and lookup('vars', item, default='') | string | length == 0"
+  with_items:
+    - kutt_database_postgres_hostname
+    - kutt_database_postgres_password
+
+- name: Fail if SMTP settings are missing (and SMTP is enabled by setting host)
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) to correctly set up email via SMTP.
+  when: "kutt_environment_variables_smtp_enabled | bool and lookup('vars', item, default='') | string | length == 0"
+  with_items:
+    - kutt_environment_variables_smtp_host
+    - kutt_environment_variables_smtp_from
+
+- name: Run if Traefik is enabled
+  when: kutt_container_labels_traefik_enabled | bool
+  block:
+    - name: Fail if Traefik settings required for Kutt are not defined
+      ansible.builtin.fail:
+        msg: >-
+          You need to define a required configuration setting (`{{ item }}`).
+      when: "lookup('vars', item, default='') | string | length == 0"
+      with_items:
+        - kutt_container_labels_traefik_hostname
+        - kutt_container_labels_traefik_path_prefix
+
+    - name: Fail if kutt_container_labels_traefik_path_prefix is different than /
+      ansible.builtin.fail:
+        msg: >-
+          kutt_container_labels_traefik_path_prefix (`{{ kutt_container_labels_traefik_path_prefix }}`) must be `/`.
+          Kutt does not support hosting under a subpath yet.
+      when: "kutt_container_labels_traefik_path_prefix != '/'"
+
+    # We ensure it doesn't end with a slash, because we handle both (slash and no-slash).
+    # Knowing that `kutt_container_labels_traefik_path_prefix` does not end with a slash
+    # ensures we know how to set these routes up without having to do "does it end with a slash" checks elsewhere.
+    - name: Fail if kutt_container_labels_traefik_path_prefix ends with a slash
+      ansible.builtin.fail:
+        msg: >-
+          kutt_container_labels_traefik_path_prefix (`{{ kutt_container_labels_traefik_path_prefix }}`) must either be `/` or not end with a slash (e.g. `/kutt`).
+      when: "kutt_container_labels_traefik_path_prefix != '/' and kutt_container_labels_traefik_path_prefix[-1] == '/'"

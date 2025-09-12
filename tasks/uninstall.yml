@@ -1,0 +1,110 @@
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Check existence of Kutt systemd service
+  ansible.builtin.stat:
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ kutt_identifier }}.service"
+  register: kutt_service_stat
+
+- name: Uninstall Kutt systemd services and files
+  when: kutt_service_stat.stat.exists | bool
+  block:
+    - name: Ensure Kutt systemd service is stopped
+      ansible.builtin.service:
+        name: "{{ kutt_identifier }}"
+        state: stopped
+        enabled: false
+        daemon_reload: true
+
+    - name: Ensure Kutt systemd service does not exist
+      ansible.builtin.file:
+        path: "{{ devture_systemd_docker_base_systemd_path }}/{{ kutt_identifier }}.service"
+        state: absent
+
+    - name: Ensure Kutt support files do not exist
+      ansible.builtin.file:
+        path: "{{ kutt_base_path }}/{{ item }}"
+        state: absent
+      with_items:
+        - env
+        - labels
+
+    - name: Ensure Kutt image source files path does not exist
+      ansible.builtin.file:
+        path: "{{ kutt_container_image_self_build_src_files_path }}"
+        state: absent
+
+    - name: Ensure Kutt local path for customization files does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ kutt_customization_path }}"
+      register: kutt_customization_path_deletion_result
+      changed_when: kutt_customization_path_deletion_result.rc == 0
+      failed_when: false
+
+    - name: Ensure Kutt local data path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ kutt_data_path }}"
+      register: kutt_data_path_deletion_result
+      changed_when: kutt_data_path_deletion_result.rc == 0
+      failed_when: false
+
+    - name: Ensure Kutt base path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ kutt_base_path }}"
+      register: kutt_base_path_deletion_result
+      changed_when: kutt_base_path_deletion_result.rc == 0
+      failed_when: false
+
+    - name: Ensure Kutt container network does not exist via community.docker.docker_network
+      when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
+      community.docker.docker_network:
+        name: "{{ kutt_container_network }}"
+        state: absent
+
+    - name: Ensure Kutt container network does not exist via ansible.builtin.command
+      when: devture_systemd_docker_base_container_network_creation_method == 'command'
+      ansible.builtin.command:
+        cmd: >-
+          {{ devture_systemd_docker_base_host_command_docker }} network rm
+          {{ kutt_container_network }}
+      register: network_deletion_result
+      changed_when: kutt_container_network in network_deletion_result.stdout
+
+- name: Check existence of Kutt local path for customization files
+  ansible.builtin.stat:
+    path: "{{ kutt_customization_path }}"
+  register: kutt_customization_path_stat
+
+# We just want to notify the user. Deleting data is too destructive.
+- name: Notify if Kutt local customization files remain
+  when: kutt_customization_path_stat.stat.exists | bool
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "Note: As the local Kutt instance has been removed, some old data remains in `" + kutt_customization_path + "`. Feel free to delete it."
+        ]
+      }}
+
+- name: Check existence of Kutt local data path
+  ansible.builtin.stat:
+    path: "{{ kutt_data_path }}"
+  register: kutt_data_path_stat
+
+# We just want to notify the user. Deleting data is too destructive.
+- name: Notify if Kutt local data remains
+  when: kutt_data_path_stat.stat.exists | bool
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "Note: As the local Kutt instance has been removed, some old data remains in `" + kutt_data_path + "`. Feel free to delete it."
+        ]
+      }}

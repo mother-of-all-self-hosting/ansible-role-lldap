@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Perform Kutt installation tasks
+  when: kutt_enabled | bool
+  tags:
+    - setup-all
+    - setup-kutt
+    - install-all
+    - install-kutt
+  block:
+    - name: Validate Kutt configuration
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+    - name: Install Kutt
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+
+- name: Perform Kutt uninstallation tasks
+  when: not kutt_enabled | bool
+  tags:
+    - setup-all
+    - setup-kutt
+  block:
+    - name: Uninstall Kutt
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
