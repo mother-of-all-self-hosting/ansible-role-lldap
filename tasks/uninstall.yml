@@ -37,13 +37,6 @@
         path: "{{ lldap_container_image_self_build_src_files_path }}"
         state: absent
 
-    - name: Ensure LLDAP local path for customization files does not exist if empty
-      ansible.builtin.command:
-        cmd: "rmdir {{ lldap_customization_path }}"
-      register: lldap_customization_path_deletion_result
-      changed_when: lldap_customization_path_deletion_result.rc == 0
-      failed_when: false
-
     - name: Ensure LLDAP local data path does not exist if empty
       ansible.builtin.command:
         cmd: "rmdir {{ lldap_data_path }}"
@@ -72,24 +65,6 @@
           {{ lldap_container_network }}
       register: network_deletion_result
       changed_when: lldap_container_network in network_deletion_result.stdout
-
-- name: Check existence of LLDAP local path for customization files
-  ansible.builtin.stat:
-    path: "{{ lldap_customization_path }}"
-  register: lldap_customization_path_stat
-
-# We just want to notify the user. Deleting data is too destructive.
-- name: Notify if LLDAP local customization files remain
-  when: lldap_customization_path_stat.stat.exists | bool
-  ansible.builtin.set_fact:
-    devture_playbook_runtime_messages_list: |
-      {{
-        devture_playbook_runtime_messages_list | default([])
-        +
-        [
-          "Note: As the local LLDAP instance has been removed, some old data remains in `" + lldap_customization_path + "`. Feel free to delete it."
-        ]
-      }}
 
 - name: Check existence of LLDAP local data path
   ansible.builtin.stat:

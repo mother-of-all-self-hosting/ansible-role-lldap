@@ -15,7 +15,6 @@ lldap_enabled: true
 lldap_identifier: lldap
 lldap_base_path: "/{{ lldap_identifier }}"
 lldap_data_path: "{{ lldap_base_path }}/data"
-lldap_customization_path: "{{ lldap_base_path }}/custom"
 
 # renovate: datasource=docker depName=lldap/lldap
 lldap_version: v3.2.3

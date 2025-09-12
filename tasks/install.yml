@@ -13,7 +13,6 @@
     group: "{{ lldap_gid }}"
   with_items:
     - "{{ lldap_base_path }}"
-    - "{{ lldap_customization_path }}"
     - "{{ lldap_data_path }}"
 
 - name: Ensure LLDAP support files installed
