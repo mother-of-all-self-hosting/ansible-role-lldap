@@ -4,74 +4,74 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Ensure Kutt paths exist
+- name: Ensure LLDAP paths exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: "0750"
-    owner: "{{ kutt_uid }}"
-    group: "{{ kutt_gid }}"
+    owner: "{{ lldap_uid }}"
+    group: "{{ lldap_gid }}"
   with_items:
-    - "{{ kutt_base_path }}"
-    - "{{ kutt_customization_path }}"
-    - "{{ kutt_data_path }}"
+    - "{{ lldap_base_path }}"
+    - "{{ lldap_customization_path }}"
+    - "{{ lldap_data_path }}"
 
-- name: Ensure Kutt support files installed
+- name: Ensure LLDAP support files installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
-    dest: "{{ kutt_base_path }}/{{ item }}"
+    dest: "{{ lldap_base_path }}/{{ item }}"
     mode: "0640"
-    owner: "{{ kutt_uid }}"
-    group: "{{ kutt_gid }}"
+    owner: "{{ lldap_uid }}"
+    group: "{{ lldap_gid }}"
   with_items:
     - env
     - labels
 
-- name: Run if self-building of Kutt container image is not enabled
-  when: "not kutt_container_image_self_build | bool"
+- name: Run if self-building of LLDAP container image is not enabled
+  when: "not lldap_container_image_self_build | bool"
   block:
-    - name: Ensure Kutt container image is pulled via community.docker.docker_image
+    - name: Ensure LLDAP container image is pulled via community.docker.docker_image
       when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
       community.docker.docker_image:
-        name: "{{ kutt_container_image }}"
+        name: "{{ lldap_container_image }}"
         source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
-        force_source: "{{ kutt_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
-        force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else kutt_container_image_force_pull }}"
+        force_source: "{{ lldap_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
+        force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else lldap_container_image_force_pull }}"
       register: result
       retries: "{{ devture_playbook_help_container_retries_count }}"
       delay: "{{ devture_playbook_help_container_retries_delay }}"
       until: result is not failed
 
-    - name: Ensure Kutt container image is pulled via ansible.builtin.command
+    - name: Ensure LLDAP container image is pulled via ansible.builtin.command
       when: devture_systemd_docker_base_container_image_pull_method == 'command'
       ansible.builtin.command:
-        cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ kutt_container_image }}"
+        cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ lldap_container_image }}"
       register: result
       retries: "{{ devture_playbook_help_container_retries_count }}"
       delay: "{{ devture_playbook_help_container_retries_delay }}"
       until: result is not failed
       changed_when: "'Downloaded newer image' in result.stdout"
 
-- name: Run if self-building of Kutt container image is enabled
-  when: "kutt_container_image_self_build | bool"
+- name: Run if self-building of LLDAP container image is enabled
+  when: "lldap_container_image_self_build | bool"
   block:
-    - name: Ensure Kutt repository is present on self-build
+    - name: Ensure LLDAP repository is present on self-build
       ansible.builtin.git:
-        repo: "{{ kutt_container_image_self_build_repo }}"
-        version: "{{ kutt_container_image_self_build_repo_version }}"
-        dest: "{{ kutt_container_image_self_build_src_files_path }}"
+        repo: "{{ lldap_container_image_self_build_repo }}"
+        version: "{{ lldap_container_image_self_build_repo_version }}"
+        dest: "{{ lldap_container_image_self_build_src_files_path }}"
         force: "yes"
-      register: kutt_git_pull_results
+      register: lldap_git_pull_results
 
     # Invoking the `docker build` command here, instead of calling the `docker_image` Ansible module,
     # because the latter does not support BuildKit.
     # See: https://github.com/ansible-collections/community.general/issues/514
-    - name: Ensure Kutt container image is built
+    - name: Ensure LLDAP container image is built
       ansible.builtin.shell:
-        chdir: "{{ kutt_container_image_self_build_src_files_path }}"
+        chdir: "{{ lldap_container_image_self_build_src_files_path }}"
         cmd: |
           {{ devture_systemd_docker_base_host_command_docker }} build \
-          -t "{{ kutt_container_image_self_build_name }}" \
+          -t "{{ lldap_container_image_self_build_name }}" \
           -f Dockerfile \
           .
       environment:
@@ -80,28 +80,28 @@
       register: result
       changed_when: "'Successfully built' in result.stdout or ('writing image' in result.stderr and 'CACHED' not in result.stderr)"
 
-- name: Ensure Kutt container network is created via community.docker.docker_network
+- name: Ensure LLDAP container network is created via community.docker.docker_network
   when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
   community.docker.docker_network:
     enable_ipv6: "{{ devture_systemd_docker_base_ipv6_enabled }}"
-    name: "{{ kutt_container_network }}"
+    name: "{{ lldap_container_network }}"
     driver: bridge
     driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
 
-- name: Ensure Kutt container network is created via ansible.builtin.command
+- name: Ensure LLDAP container network is created via ansible.builtin.command
   when: devture_systemd_docker_base_container_network_creation_method == 'command'
   ansible.builtin.command:
     cmd: >-
       {{ devture_systemd_docker_base_host_command_docker }} network create
       {% if devture_systemd_docker_base_ipv6_enabled %}--ipv6{% endif %}
       {{ devture_systemd_docker_base_container_networks_driver_options_string }}
-      {{ kutt_container_network }}
+      {{ lldap_container_network }}
   register: network_creation_result
   changed_when: network_creation_result.rc == 0
   failed_when: network_creation_result.rc != 0 and 'already exists' not in network_creation_result.stderr
 
-- name: Ensure Kutt systemd service is present
+- name: Ensure LLDAP systemd service is present
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/systemd/kutt.service.j2"
-    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ kutt_identifier }}.service"
+    src: "{{ role_path }}/templates/systemd/lldap.service.j2"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ lldap_identifier }}.service"
     mode: "0644"

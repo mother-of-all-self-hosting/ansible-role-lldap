@@ -4,24 +4,24 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Perform Kutt installation tasks
-  when: kutt_enabled | bool
+- name: Perform LLDAP installation tasks
+  when: lldap_enabled | bool
   tags:
     - setup-all
-    - setup-kutt
+    - setup-lldap
     - install-all
-    - install-kutt
+    - install-lldap
   block:
-    - name: Validate Kutt configuration
+    - name: Validate LLDAP configuration
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-    - name: Install Kutt
+    - name: Install LLDAP
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
-- name: Perform Kutt uninstallation tasks
-  when: not kutt_enabled | bool
+- name: Perform LLDAP uninstallation tasks
+  when: not lldap_enabled | bool
   tags:
     - setup-all
-    - setup-kutt
+    - setup-lldap
   block:
-    - name: Uninstall Kutt
+    - name: Uninstall LLDAP
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
