@@ -20,6 +20,16 @@
     - lldap_environment_variables_lldap_jwt_secret
     - lldap_environment_variables_lldap_key_seed
 
+- name: Fail if required admin user credentials for LLDAP are not defined
+  ansible.builtin.fail:
+    msg: >-
+      You need to define username and password (`{{ item }}`) for the admin user.
+      Note that changing the values does not update them once the user is created.
+  when: "lookup('vars', item, default='') | string | length == 0"
+  with_items:
+    - lldap_environment_variables_lldap_ldap_user_dn
+    - lldap_environment_variables_lldap_ldap_user_pass
+
 - name: Fail if LLDAP database type is invalid
   ansible.builtin.fail:
     msg: >-

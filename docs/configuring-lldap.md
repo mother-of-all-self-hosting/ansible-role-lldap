@@ -77,6 +77,21 @@ lldap_environment_variables_lldap_jwt_secret: RANDOM_STRING_HERE
 lldap_environment_variables_lldap_key_seed: RANDOM_STRING_HERE
 ```
 
+### Specify the username and password for the initial admin user
+
+It is necessary to create an initial user with admin privileges by adding the following configuration to your `vars.yml` file:
+
+```yaml
+lldap_environment_variables_lldap_ldap_user_dn: ADMIN_USER_USERNAME_HERE
+
+lldap_environment_variables_lldap_ldap_user_pass: ADMIN_USER_PASSWORD_HERE
+```
+
+The password is used both for the LDAP bind and for the administration interface.
+
+>[!NOTE]
+> Changing those values does not update them once the user is created. The password can be updated on the LLDAP's UI. If you lost it, you can set `force_ldap_user_pass_reset` to `true` on `lldap_config.docker_template.toml` inside the mounted data directory in order to force a reset of the admin password to the value specified to `lldap_environment_variables_lldap_ldap_user_pass`.
+
 ### Specify database (optional)
 
 You can specify a database used by LLDAP. By default it is configured to use SQLite, and the SQLite database is stored in the directory specified with `lldap_data_path`.

@@ -207,6 +207,12 @@ lldap_environment_variables_lldap_key_seed: ""
 # Note this does not have to be your own domain
 lldap_environment_variables_lldap_ldap_base_dn: dc=example,dc=com
 
+# Specify a username for the admin user
+lldap_environment_variables_lldap_ldap_user_dn: ""
+
+# Specify a password for the admin user
+lldap_environment_variables_lldap_ldap_user_pass: ""
+
 # Specify a database driver to use
 # Valid values: better-sqlite3, sqlite3, mysql2, pg, pg-native
 # Note pg-native and sqlite3 are not installed by default.
