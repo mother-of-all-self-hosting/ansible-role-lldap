@@ -196,6 +196,9 @@ lldap_systemd_wanted_services_list_default: []
 lldap_systemd_wanted_services_list_auto: []
 lldap_systemd_wanted_services_list_custom: []
 
+# Specify the timezone
+lldap_environment_variables_tz: UTC
+
 # Specify a random string for signing authentication tokens
 # generated with `pwgen -s 64 1` or in another way.
 lldap_environment_variables_jwt_secret: ''
