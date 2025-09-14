@@ -184,12 +184,6 @@ lldap_systemd_wanted_services_list_custom: []
 # generated with `pwgen -s 64 1` or in another way.
 lldap_environment_variables_jwt_secret: ''
 
-# Note that this requires `lldap_environment_variables_mail_enabled` with related configurations to be `true`.
-lldap_environment_variables_disallow_registration: true
-
-lldap_environment_variables_disallow_anonymous_links: true
-lldap_environment_variables_trust_proxy: true
-
 # Specify a database driver to use
 # Valid values: better-sqlite3, sqlite3, mysql2, pg, pg-native
 # Note pg-native and sqlite3 are not installed by default.
@@ -213,14 +207,6 @@ lldap_database_postgres_ssl: false
 
 lldap_database_name: lldap
 
-# Control if an external Redis instance is used
-lldap_redis_hostname: ""
-lldap_redis_port: 6379
-lldap_redis_password: ""
-lldap_redis_database: 0
-
-lldap_environment_variables_enable_rate_limit: true
-
 # Specify mailer configuration
 lldap_environment_variables_smtp_enabled: false
 lldap_environment_variables_smtp_host: ""
@@ -229,9 +215,6 @@ lldap_environment_variables_smtp_user: ""
 lldap_environment_variables_smtp_password: ""
 lldap_environment_variables_smtp_from: ""
 lldap_environment_variables_smtp_secure: false
-
-lldap_environment_variables_report_email: ""
-lldap_environment_variables_contact_email: ""
 
 # Additional environment variables.
 lldap_environment_variables_additional_variables: ''

@@ -7,7 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # LLDAP Ansible role
 
-This is an [Ansible](https://www.ansible.com/) role which installs [LLDAP](https://lldap.it/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs [LLDAP](https://github.com/lldap/lldap/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
 This role *implicitly* depends on:
 

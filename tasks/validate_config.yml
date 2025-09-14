@@ -19,7 +19,7 @@
     - lldap_container_network
     - lldap_environment_variables_jwt_secret
 
-- name: Fail if LLDAP database driver option is invalid
+- name: Fail if LLDAP database type is invalid
   ansible.builtin.fail:
     msg: >-
       lldap_database_type must be 'better-sqlite3', 'sqlite3', 'mysql2', 'pg', or 'pg-native'. Since 'sqlite3' and 'pg-native' are not installed by default, you need to install them beforehand to use them.
