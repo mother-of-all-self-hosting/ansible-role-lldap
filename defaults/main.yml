@@ -213,6 +213,11 @@ lldap_environment_variables_lldap_ldap_user_dn: ""
 # Specify a password for the admin user
 lldap_environment_variables_lldap_ldap_user_pass: ""
 
+# Set to `true` to force-reset the admin password to the one
+# specified to `lldap_environment_variables_lldap_ldap_user_pass` if it is lost
+# Also see: https://github.com/lldap/lldap/blob/main/lldap_config.docker_template.toml
+lldap_environment_variables_force_ldap_user_pass_reset: false
+
 # Specify a database driver to use
 # Valid values: better-sqlite3, sqlite3, mysql2, pg, pg-native
 # Note pg-native and sqlite3 are not installed by default.
