@@ -118,6 +118,9 @@ If you wish to expose the LDAPS port, add the following configuration to your `v
 lldap_container_ldaps_host_bind_port: 6360
 ```
 
+>[!NOTE]
+> To set up LDAPS, it is necessary to install a TLS certificate and its private key with `lldap_environment_variables_lldap_ldaps_options__*` variables. See [`defaults/main.yml`](../defaults/main.yml) to check what should be configured.
+
 ### Configure the mailer (optional)
 
 You can configure a SMTP mailer to enable it for sending password reset emails.

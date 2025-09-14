@@ -246,5 +246,12 @@ lldap_environment_variables_smtp_to: ""
 # Valid values: NONE, STARTTLS, TLS
 lldap_environment_variables_smtp_encryption: NONE
 
+# Control if LDAPS is enabled
+lldap_environment_variables_lldap_ldaps_options__enabled: false
+
+# Set cert and key path if `lldap_environment_variables_lldap_ldaps_options__enabled` is set to `true`
+lldap_environment_variables_lldap_ldaps_options__cert_file: /path/to/certfile.crt
+lldap_environment_variables_lldap_ldaps_options__key_file: /path/to/keyfile.key
+
 # Additional environment variables.
 lldap_environment_variables_additional_variables: ''
