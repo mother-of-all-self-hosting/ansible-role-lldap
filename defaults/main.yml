@@ -241,7 +241,10 @@ lldap_environment_variables_smtp_port: 587
 lldap_environment_variables_smtp_user: ""
 lldap_environment_variables_smtp_password: ""
 lldap_environment_variables_smtp_from: ""
-lldap_environment_variables_smtp_secure: false
+lldap_environment_variables_smtp_to: ""
+# Control if SMTP connection is encrypted
+# Valid values: NONE, STARTTLS, TLS
+lldap_environment_variables_smtp_encryption: NONE
 
 # Additional environment variables.
 lldap_environment_variables_additional_variables: ''

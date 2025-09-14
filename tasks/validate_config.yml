@@ -63,6 +63,12 @@
     - lldap_environment_variables_smtp_host
     - lldap_environment_variables_smtp_from
 
+- name: Fail if lldap SMTP connection encryption option is invalid
+  ansible.builtin.fail:
+    msg: >-
+      lldap_environment_variables_smtp_encryption must be 'NONE', 'STARTTLS', or 'TLS'.
+  when: "lldap_environment_variables_smtp_encryption not in ['NONE', 'STARTTLS', 'TLS']"
+
 - name: Run if Traefik is enabled
   when: lldap_container_labels_traefik_enabled | bool
   block:

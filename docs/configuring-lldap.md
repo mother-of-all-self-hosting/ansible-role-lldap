@@ -120,7 +120,7 @@ lldap_container_ldaps_host_bind_port: 6360
 
 ### Configure the mailer (optional)
 
-You can configure a SMTP mailer to enable it for for signing up, verifying or changing email address, resetting password, and sending reports.
+You can configure a SMTP mailer to enable it for sending password reset emails.
 
 To configure it, add the following configuration to your `vars.yml` file as below (adapt to your needs):
 
@@ -143,8 +143,12 @@ lldap_environment_variables_smtp_password: ""
 # Set the email address that emails will be sent from
 lldap_environment_variables_smtp_from: ""
 
-# Set to `true` if SSL is used for communication with the SMTP server
-lldap_environment_variables_smtp_secure: false
+# Set the email address to be specified to the reply-to header
+lldap_environment_variables_smtp_to: ""
+
+# Set `TLS` or `STARTTLS` to enable encrypted connection with the SMTP server
+# Valid values: NONE, STARTTLS, TLS
+lldap_environment_variables_smtp_encryption: NONE
 ```
 
 ⚠️ **Note**: without setting an authentication method such as DKIM, SPF, and DMARC for your hostname, emails are most likely to be quarantined as spam at recipient's mail servers. If you have set up a mail server with the [MASH project's exim-relay Ansible role](https://github.com/mother-of-all-self-hosting/ansible-role-exim-relay), you can enable DKIM signing with it. Refer [its documentation](https://github.com/mother-of-all-self-hosting/ansible-role-exim-relay/blob/main/docs/configuring-exim-relay.md#enable-dkim-support-optional) for details.
