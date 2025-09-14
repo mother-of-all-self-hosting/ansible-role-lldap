@@ -56,7 +56,7 @@ lldap_container_http_host_bind_port: ''
 lldap_container_network: "{{ lldap_identifier }}"
 
 # The port number in the container
-lldap_container_http_port: 3000
+lldap_container_http_port: 17170
 
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
