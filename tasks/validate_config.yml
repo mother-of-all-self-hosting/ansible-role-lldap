@@ -17,7 +17,8 @@
     - lldap_hostname
     - lldap_path_prefix
     - lldap_container_network
-    - lldap_environment_variables_jwt_secret
+    - lldap_environment_variables_lldap_jwt_secret
+    - lldap_environment_variables_lldap_key_seed
 
 - name: Fail if LLDAP database type is invalid
   ansible.builtin.fail:

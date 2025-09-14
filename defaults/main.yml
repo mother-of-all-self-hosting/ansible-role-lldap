@@ -199,9 +199,9 @@ lldap_systemd_wanted_services_list_custom: []
 # Specify the timezone
 lldap_environment_variables_tz: UTC
 
-# Specify a random string for signing authentication tokens
-# generated with `pwgen -s 64 1` or in another way.
-lldap_environment_variables_jwt_secret: ''
+# Specify random strings, generated with `pwgen -s 64 1` or in another way.
+lldap_environment_variables_lldap_jwt_secret: ""
+lldap_environment_variables_lldap_key_seed: ""
 
 # Specify a database driver to use
 # Valid values: better-sqlite3, sqlite3, mysql2, pg, pg-native

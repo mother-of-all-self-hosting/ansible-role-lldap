@@ -67,12 +67,14 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 **Note**: hosting LLDAP under a subpath (by configuring the `lldap_path_prefix` variable) does not seem to be possible due to LLDAP's technical limitations.
 
-### Set a random string for signing authentication tokens
+### Set random strings
 
-You also need to set a random string for signing authentication tokens. To do so, add the following configuration to your `vars.yml` file. The value can be generated with `pwgen -s 64 1` or in another way.
+You also need to set random strings for a JWT secret and key seed. To do so, add the following configuration to your `vars.yml` file. The values can be generated with `pwgen -s 64 1` or in another way.
 
 ```yaml
-lldap_environment_variables_jwt_secret: YOUR_SECRET_KEY_HERE
+lldap_environment_variables_lldap_jwt_secret: RANDOM_STRING_HERE
+
+lldap_environment_variables_lldap_key_seed: RANDOM_STRING_HERE
 ```
 
 ### Specify database (optional)
