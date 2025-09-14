@@ -89,6 +89,18 @@ Set `mysql2` to use a MySQL compatible database via [MySQL2](https://sidorares.g
 
 For other settings, check variables such as `lldap_database_postgres_*` and `lldap_database_mysql_*` on [`defaults/main.yml`](../defaults/main.yml).
 
+### Configure LDAP / LLDAPS port (optional)
+
+LLDAP uses the port 3890 for LDAP and port 6360 for LDAPS (LDAP over HTTPS), respectively.
+
+By default they are not exposed to the internet as the LLDAP's container can be accessed by other containers via the internal network, which they connect to. It is also [not recommended](https://github.com/lldap/lldap/blob/main/docs/install.md#with-docker) to expose the LDAP port.
+
+If you wish to expose the LDAPS port, add the following configuration to your `vars.yml` file and adjust the port as you see fit.
+
+```yaml
+lldap_container_ldaps_host_bind_port: 6360
+```
+
 ### Configure the mailer (optional)
 
 You can configure a SMTP mailer to enable it for for signing up, verifying or changing email address, resetting password, and sending reports.

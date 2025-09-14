@@ -33,6 +33,12 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% if lldap_container_http_host_bind_port %}
       -p {{ lldap_container_http_host_bind_port }}:{{ lldap_container_http_port }} \
       {% endif %}
+      {% if lldap_container_ldap_host_bind_port %}
+      -p {{ lldap_container_ldap_host_bind_port }}:{{ lldap_container_ldap_port }} \
+      {% endif %}
+      {% if lldap_container_ldaps_host_bind_port %}
+      -p {{ lldap_container_ldaps_host_bind_port }}:{{ lldap_container_ldaps_port }} \
+      {% endif %}
       --env-file={{ lldap_base_path }}/env \
       --label-file={{ lldap_base_path }}/labels \
       --mount type=bind,src={{ lldap_data_path }},dst=/data \
