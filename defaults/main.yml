@@ -35,7 +35,7 @@ lldap_hostname: ''
 lldap_path_prefix: /
 
 lldap_container_image: "{{ lldap_container_image_registry_prefix }}lldap/lldap:{{ lldap_container_image_tag }}"
-lldap_container_image_tag: "{{ lldap_version }}"
+lldap_container_image_tag: "{{ lldap_version }}-alpine-rootless"
 lldap_container_image_registry_prefix: "{{ lldap_container_image_registry_prefix_upstream }}"
 lldap_container_image_registry_prefix_upstream: "{{ lldap_container_image_registry_prefix_upstream_default }}"
 lldap_container_image_registry_prefix_upstream_default: docker.io/
