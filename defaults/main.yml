@@ -203,6 +203,10 @@ lldap_environment_variables_tz: UTC
 lldap_environment_variables_lldap_jwt_secret: ""
 lldap_environment_variables_lldap_key_seed: ""
 
+# Specify the base Distinguished Name (dn)
+# Note this does not have to be your own domain
+lldap_environment_variables_lldap_ldap_base_dn: dc=example,dc=com
+
 # Specify a database driver to use
 # Valid values: better-sqlite3, sqlite3, mysql2, pg, pg-native
 # Note pg-native and sqlite3 are not installed by default.
