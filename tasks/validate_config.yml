@@ -33,23 +33,23 @@
 - name: Fail if LLDAP database type is invalid
   ansible.builtin.fail:
     msg: >-
-      lldap_database_type must be 'better-sqlite3', 'sqlite3', 'mysql2', 'pg', or 'pg-native'. Since 'sqlite3' and 'pg-native' are not installed by default, you need to install them beforehand to use them.
-  when: "lldap_database_type not in ['better-sqlite3', 'sqlite3', 'mysql2', 'pg', 'pg-native']"
+      lldap_database_type must be 'mysql', 'postgres', or 'sqlite'.
+  when: "lldap_database_type not in ['postgres', 'mysql', 'sqlite']"
 
-- name: Fail if required LLDAP + MySQL2 integration settings not defined
+- name: Fail if required LLDAP + MySQL integration settings not defined
   ansible.builtin.fail:
     msg: >-
-      You need to define a required configuration setting (`{{ item }}`) when `lldap_database_type` is `mysql2`
-  when: "lldap_database_type == 'mysql2' and lookup('vars', item, default='') | string | length == 0"
+      You need to define a required configuration setting (`{{ item }}`) when `lldap_database_type` is `mysql`
+  when: "lldap_database_type == 'mysql' and lookup('vars', item, default='') | string | length == 0"
   with_items:
     - lldap_database_mysql_hostname
     - lldap_database_mysql_password
 
-- name: Fail if required LLDAP + pg integration settings not defined
+- name: Fail if required LLDAP + Postgres integration settings not defined
   ansible.builtin.fail:
     msg: >-
-      You need to define a required configuration setting (`{{ item }}`) when `lldap_database_type` is `pg`
-  when: "lldap_database_type == 'pg' and lookup('vars', item, default='') | string | length == 0"
+      You need to define a required configuration setting (`{{ item }}`) when `lldap_database_type` is `postgres`
+  when: "lldap_database_type == 'postgres' and lookup('vars', item, default='') | string | length == 0"
   with_items:
     - lldap_database_postgres_hostname
     - lldap_database_postgres_password

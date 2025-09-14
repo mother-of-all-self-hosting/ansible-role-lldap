@@ -219,26 +219,19 @@ lldap_environment_variables_lldap_ldap_user_pass: ""
 lldap_environment_variables_force_ldap_user_pass_reset: false
 
 # Specify a database driver to use
-# Valid values: better-sqlite3, sqlite3, mysql2, pg, pg-native
-# Note pg-native and sqlite3 are not installed by default.
-lldap_database_type: better-sqlite3
+# Valid values: mysql, postgres, sqlite
+lldap_database_type: sqlite
 
 # Specify database configuration
-lldap_database_filename: ''
+lldap_database_filename: "data/users.db"
 lldap_database_mysql_hostname: ''
 lldap_database_mysql_port: 3306
-lldap_database_mysql_username: mysql2
+lldap_database_mysql_username: lldap
 lldap_database_mysql_password: ''
-lldap_database_mysql_ssl: false
 lldap_database_postgres_hostname: ''
 lldap_database_postgres_port: 5432
-lldap_database_postgres_username: postgres
+lldap_database_postgres_username: lldap
 lldap_database_postgres_password: ''
-
-# Use this to set the sslmode parameter of the SSL connection
-# By default, we expect a local container (without SSL), so attempting SSL connections is not necessary.
-lldap_database_postgres_ssl: false
-
 lldap_database_name: lldap
 
 # Specify mailer configuration

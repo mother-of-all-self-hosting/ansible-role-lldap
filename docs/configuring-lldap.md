@@ -96,16 +96,13 @@ The password is used both for the LDAP bind and for the administration interface
 
 You can specify a database used by LLDAP. By default it is configured to use SQLite, and the SQLite database is stored in the directory specified with `lldap_data_path`.
 
-To use `pg` (node-postgres), a PostgreSQL client for Node.js, add the following configuration to your `vars.yml` file:
+To use Postgres, add the following configuration to your `vars.yml` file:
 
 ```yaml
-lldap_database_type: pg
+lldap_database_type: postgres
 ```
 
-Set `mysql2` to use a MySQL compatible database via [MySQL2](https://sidorares.github.io/node-mysql2/docs), a MySQL client for Node.js.
-
->[!NOTE]
-> It is possible to use `pg-native` for Postgres and `sqlite3` for SQlite. As they are not installed by default, you'll need to install them with `npm` beforehand.
+Set `mysql` to use a MySQL compatible database.
 
 For other settings, check variables such as `lldap_database_postgres_*` and `lldap_database_mysql_*` on [`defaults/main.yml`](../defaults/main.yml).
 
