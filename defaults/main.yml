@@ -253,5 +253,8 @@ lldap_environment_variables_lldap_ldaps_options__enabled: false
 lldap_environment_variables_lldap_ldaps_options__cert_file: /path/to/certfile.crt
 lldap_environment_variables_lldap_ldaps_options__key_file: /path/to/keyfile.key
 
+# Set to `true` to increase logging verbosity
+lldap_environment_variables_lldap_verbose: false
+
 # Additional environment variables.
 lldap_environment_variables_additional_variables: ''
