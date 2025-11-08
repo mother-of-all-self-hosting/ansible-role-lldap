@@ -19,13 +19,13 @@ lldap_data_path: "{{ lldap_base_path }}/data"
 # renovate: datasource=docker depName=lldap/lldap
 lldap_version: v0.6.2
 
-lldap_uid: ''
-lldap_gid: ''
+lldap_uid: ""
+lldap_gid: ""
 
 lldap_scheme: https
 
 # The hostname at which LLDAP is served.
-lldap_hostname: ''
+lldap_hostname: ""
 
 # The path at which LLDAP is exposed.
 # This value must either be `/` or not end with a slash (e.g. `/lldap`).
@@ -50,17 +50,17 @@ lldap_container_image_self_build_src_files_path: "{{ lldap_base_path }}/docker-s
 # Controls whether the container exposes its HTTP port (tcp/80 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
-lldap_container_http_host_bind_port: ''
+lldap_container_http_host_bind_port: ""
 
 # Controls whether the container exposes its LDAP port (tcp/3890 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
-lldap_container_ldap_host_bind_port: ''
+lldap_container_ldap_host_bind_port: ""
 
 # Controls whether the container exposes its LDAPS port (tcp/6360 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
-lldap_container_ldaps_host_bind_port: ''
+lldap_container_ldaps_host_bind_port: ""
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 lldap_container_network: "{{ lldap_identifier }}"
@@ -132,7 +132,7 @@ lldap_container_labels_traefik_additional_response_headers_custom: {}
 # lldap_container_labels_additional_labels: |
 #   my.label=1
 #   another.label="here"
-lldap_container_labels_additional_labels: ''
+lldap_container_labels_additional_labels: ""
 
 # A list of extra arguments to pass to the container (`docker run` command)
 lldap_container_extra_arguments: []
@@ -219,14 +219,14 @@ lldap_database_type: sqlite
 
 # Specify database configuration
 lldap_database_filename: "data/users.db"
-lldap_database_mysql_hostname: ''
+lldap_database_mysql_hostname: ""
 lldap_database_mysql_port: 3306
 lldap_database_mysql_username: lldap
-lldap_database_mysql_password: ''
-lldap_database_postgres_hostname: ''
+lldap_database_mysql_password: ""
+lldap_database_postgres_hostname: ""
 lldap_database_postgres_port: 5432
 lldap_database_postgres_username: lldap
-lldap_database_postgres_password: ''
+lldap_database_postgres_password: ""
 lldap_database_name: lldap
 
 # Specify mailer configuration
@@ -252,4 +252,4 @@ lldap_environment_variables_lldap_ldaps_options__key_file: /path/to/keyfile.key
 lldap_environment_variables_lldap_verbose: false
 
 # Additional environment variables.
-lldap_environment_variables_additional_variables: ''
+lldap_environment_variables_additional_variables: ""
