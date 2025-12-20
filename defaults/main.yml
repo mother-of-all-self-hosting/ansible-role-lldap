@@ -196,6 +196,22 @@ lldap_systemd_wanted_services_list_default: []
 lldap_systemd_wanted_services_list_auto: []
 lldap_systemd_wanted_services_list_custom: []
 
+# Specify a database driver to use
+# Valid values: mysql, postgres, sqlite
+lldap_database_type: sqlite
+
+# Specify database configuration
+lldap_database_filename: "data/users.db"
+lldap_database_mysql_hostname: ""
+lldap_database_mysql_port: 3306
+lldap_database_mysql_username: lldap
+lldap_database_mysql_password: ""
+lldap_database_postgres_hostname: ""
+lldap_database_postgres_port: 5432
+lldap_database_postgres_username: lldap
+lldap_database_postgres_password: ""
+lldap_database_name: lldap
+
 # Specify the timezone
 lldap_environment_variables_tz: UTC
 
@@ -212,22 +228,6 @@ lldap_environment_variables_lldap_ldap_user_dn: ""
 
 # Specify a password for the admin user
 lldap_environment_variables_lldap_ldap_user_pass: ""
-
-# Specify a database driver to use
-# Valid values: mysql, postgres, sqlite
-lldap_database_type: sqlite
-
-# Specify database configuration
-lldap_database_filename: "data/users.db"
-lldap_database_mysql_hostname: ""
-lldap_database_mysql_port: 3306
-lldap_database_mysql_username: lldap
-lldap_database_mysql_password: ""
-lldap_database_postgres_hostname: ""
-lldap_database_postgres_port: 5432
-lldap_database_postgres_username: lldap
-lldap_database_postgres_password: ""
-lldap_database_name: lldap
 
 # Specify mailer configuration
 lldap_environment_variables_smtp_enabled: false
