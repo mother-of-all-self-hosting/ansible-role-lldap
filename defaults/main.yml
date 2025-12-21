@@ -137,7 +137,7 @@ lldap_container_labels_additional_labels: "{{ lldap_container_labels_additional_
 lldap_container_labels_additional_labels_auto: {}
 lldap_container_labels_additional_labels_custom: {}
 
-# A list of extra arguments to pass to the container (`docker run` command)
+# A list of extra arguments to pass to the container (`docker create` command)
 lldap_container_extra_arguments: "{{ lldap_container_extra_arguments_auto + lldap_container_extra_arguments_custom }}"
 lldap_container_extra_arguments_auto: []
 lldap_container_extra_arguments_custom: []
