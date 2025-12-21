@@ -27,7 +27,7 @@ lldap_scheme: https
 # The hostname at which LLDAP is served.
 lldap_hostname: ""
 
-# The path at which LLDAP is exposed.
+# The path at which LLDAP is served.
 # This value must either be `/` or not end with a slash (e.g. `/lldap`).
 #
 # Hosting LLDAP under a subpath does not seem to be possible due to LLDAP's
