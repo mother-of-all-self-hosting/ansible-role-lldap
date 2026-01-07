@@ -131,11 +131,11 @@ lldap_container_labels_traefik_additional_response_headers_custom: {}
 #
 # Example:
 # lldap_container_labels_additional_labels_custom: |
-#   my.label=1
-#   another.label="here"
-lldap_container_labels_additional_labels: "{{ lldap_container_labels_additional_labels_auto | combine(lldap_container_labels_additional_labels_custom) }}"
-lldap_container_labels_additional_labels_auto: {}
-lldap_container_labels_additional_labels_custom: {}
+#   - my.label=1
+#   - another.label="here"
+lldap_container_labels_additional_labels: "{{ lldap_container_labels_additional_labels_auto + lldap_container_labels_additional_labels_custom }}"
+lldap_container_labels_additional_labels_auto: []
+lldap_container_labels_additional_labels_custom: []
 
 # A list of extra arguments to pass to the container (`docker create` command)
 lldap_container_extra_arguments: "{{ lldap_container_extra_arguments_auto + lldap_container_extra_arguments_custom }}"
