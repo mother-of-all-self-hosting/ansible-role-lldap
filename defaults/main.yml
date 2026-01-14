@@ -22,6 +22,7 @@ lldap_version: v0.6.2
 lldap_uid: ""
 lldap_gid: ""
 
+# The scheme used for serving LLDAP.
 lldap_scheme: https
 
 # The hostname at which LLDAP is served.
