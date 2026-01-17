@@ -48,6 +48,9 @@ lldap_container_image_self_build_repo: "https://github.com/lldap/lldap.git"
 lldap_container_image_self_build_repo_version: "{{ lldap_version if lldap_version != 'latest' else 'main' }}"
 lldap_container_image_self_build_src_files_path: "{{ lldap_base_path }}/docker-src"
 
+# The base container network. It will be auto-created by this role if it doesn't exist already.
+lldap_container_network: "{{ lldap_identifier }}"
+
 # Controls whether the container exposes its HTTP port (tcp/80 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
@@ -62,9 +65,6 @@ lldap_container_ldap_host_bind_port: ""
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 lldap_container_ldaps_host_bind_port: ""
-
-# The base container network. It will be auto-created by this role if it doesn't exist already.
-lldap_container_network: "{{ lldap_identifier }}"
 
 # The port number in the container
 lldap_container_http_port: 17170
