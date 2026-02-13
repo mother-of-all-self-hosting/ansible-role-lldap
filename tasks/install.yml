@@ -25,6 +25,7 @@
   with_items:
     - env
     - labels
+  register: lldap_support_files_result
 
 - name: Run if self-building of LLDAP container image is not enabled
   when: "not lldap_container_image_self_build | bool"
@@ -36,19 +37,19 @@
         source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
         force_source: "{{ lldap_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
         force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else lldap_container_image_force_pull }}"
-      register: result
+      register: lldap_container_image_pull_result
       retries: "{{ devture_playbook_help_container_retries_count }}"
       delay: "{{ devture_playbook_help_container_retries_delay }}"
-      until: result is not failed
+      until: lldap_container_image_pull_result is not failed
 
     - name: Ensure LLDAP container image is pulled via ansible.builtin.command
       when: devture_systemd_docker_base_container_image_pull_method == 'command'
       ansible.builtin.command:
         cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ lldap_container_image }}"
-      register: result
+      register: lldap_container_image_pull_result
       retries: "{{ devture_playbook_help_container_retries_count }}"
       delay: "{{ devture_playbook_help_container_retries_delay }}"
-      until: result is not failed
+      until: lldap_container_image_pull_result is not failed
       changed_when: "'Downloaded newer image' in result.stdout"
 
 - name: Run if self-building of LLDAP container image is enabled
@@ -104,3 +105,13 @@
     src: "{{ role_path }}/templates/systemd/lldap.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ lldap_identifier }}.service"
     mode: "0644"
+  register: lldap_systemd_service_result
+
+- name: Determine whether LLDAP needs a restart
+  ansible.builtin.set_fact:
+    lldap_restart_necessary: >-
+      {{
+        lldap_support_files_result.changed | default(false)
+        or lldap_systemd_service_result.changed | default(false)
+        or lldap_container_image_pull_result.changed | default(false)
+      }}
