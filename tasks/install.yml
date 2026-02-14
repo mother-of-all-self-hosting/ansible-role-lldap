@@ -77,8 +77,8 @@
       environment:
         DOCKER_BUILDKIT: "1"
         PYTHON: "/usr/bin/python3"
-      register: result
-      changed_when: "'Successfully built' in result.stdout or ('writing image' in result.stderr and 'CACHED' not in result.stderr)"
+      register: lldap_container_image_build_result
+      changed_when: "'Successfully built' in lldap_container_image_build_result.stdout or ('writing image' in lldap_container_image_build_result.stderr and 'CACHED' not in lldap_container_image_build_result.stderr)"
 
 - name: Ensure LLDAP container network is created via community.docker.docker_network
   when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
@@ -114,4 +114,5 @@
         lldap_support_files_result.changed | default(false)
         or lldap_systemd_service_result.changed | default(false)
         or lldap_container_image_pull_result.changed | default(false)
+        or lldap_container_image_build_result.changed | default(false)
       }}
