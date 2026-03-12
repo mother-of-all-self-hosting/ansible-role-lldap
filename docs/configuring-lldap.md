@@ -121,7 +121,7 @@ lldap_container_ldaps_host_bind_port: 6360
 >[!NOTE]
 > To set up LDAPS, it is necessary to install a TLS certificate and its private key with `lldap_environment_variables_lldap_ldaps_options__*` variables. See [`defaults/main.yml`](../defaults/main.yml) to check what should be configured.
 
-### Configure the mailer (optional)
+### Configuring the mailer (optional)
 
 You can configure a SMTP mailer to enable it for sending password reset emails.
 
@@ -154,7 +154,7 @@ lldap_environment_variables_smtp_to: ""
 lldap_environment_variables_smtp_encryption: NONE
 ```
 
->[!NOTE]
+>[!WARNING]
 > Without setting an authentication method such as DKIM, SPF, and DMARC for your hostname, emails are most likely to be quarantined as spam at recipient's mail servers. The worst scenario is that your server's IP address or hostname will be included in the spam list such as the one managed by [Spamhaus](https://www.spamhaus.org/). If you have set up a mail server with the [MASH project's exim-relay Ansible role](https://github.com/mother-of-all-self-hosting/ansible-role-exim-relay), you can enable DKIM signing with it. Refer [its documentation](https://github.com/mother-of-all-self-hosting/ansible-role-exim-relay/blob/main/docs/configuring-exim-relay.md#enable-dkim-support-optional) for details.
 
 ### Extending the configuration
