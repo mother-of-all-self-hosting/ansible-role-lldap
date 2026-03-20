@@ -253,7 +253,7 @@ lldap_database_postgres_password: ""
 # Specify SSL mode for Postgres database server
 # By default, we expect a local container (without SSL), so attempting SSL connections is not necessary.
 # Valid values: see https://www.postgresql.org/docs/11/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-lldap_database_sslmode: disable
+lldap_database_postgres_sslmode: disable
 lldap_database_name: lldap
 
 # Specify the timezone
