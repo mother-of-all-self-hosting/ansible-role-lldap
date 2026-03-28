@@ -1,9 +1,9 @@
-# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023, 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2024 Julian-Samuel Gebühr
 # SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
 # SPDX-FileCopyrightText: 2025 MASH project contributors
-# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -236,6 +236,12 @@ lldap_container_cleanup_command: |
   echo "Failed to remove stale container {{ lldap_identifier }} after {{ lldap_container_cleanup_timeout_seconds }} attempts" >&2;
   exit 1
 
+########################################################################
+#                                                                      #
+# database                                                             #
+#                                                                      #
+########################################################################
+
 # Specify a database driver to use
 # Valid values: mysql, postgres, sqlite
 lldap_database_type: sqlite
@@ -255,6 +261,46 @@ lldap_database_postgres_password: ""
 # Valid values: see https://www.postgresql.org/docs/11/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
 lldap_database_postgres_sslmode: disable
 lldap_database_name: lldap
+
+lldap_environment_variables_lldap_database_url_mysql: |
+  mysql://{{ lldap_database_mysql_username }}:{{ lldap_database_mysql_password }}@
+  {%- if lldap_database_mysql_socket_enabled -%}
+  localhost/{{ lldap_database_name }}?socket={{ lldap_database_mysql_socket_path_container + '/mysqld.sock' }}
+  {%- else -%}
+  {{ lldap_database_mysql_hostname }}:{{ lldap_database_mysql_port }}/{{ lldap_database_name }}
+  {%- endif -%}
+
+lldap_environment_variables_lldap_database_url_postgres: |
+  postgres://{{ lldap_database_postgres_username }}:{{ lldap_database_postgres_password }}@
+  {%- if lldap_database_postgres_socket_enabled -%}
+  localhost/{{ lldap_database_name }}?host={{ lldap_database_postgres_socket_path_container }}
+  {%- else -%}
+  {{ lldap_database_postgres_hostname }}:{{ lldap_database_postgres_port }}/{{ lldap_database_name }}?sslmode={{ lldap_database_postgres_sslmode }}
+  {%- endif -%}
+
+# Control if the connection to MySQL is made via a Unix socket
+lldap_database_mysql_socket_enabled: true
+
+# Specify the path to the MySQL Unix socket path on the host (bind-mount source)
+lldap_database_mysql_socket_path_host: ""
+
+# Specify the path to the MySQL Unix socket path inside the LLDAP server container
+lldap_database_mysql_socket_path_container: /run-mysqld
+
+# Control if the connection to Postgres is made via a Unix socket
+lldap_database_postgres_socket_enabled: true
+
+# Specify the path to the Postgres Unix socket path on the host (bind-mount source)
+lldap_database_postgres_socket_path_host: ""
+
+# Specify the path to the Postgres Unix socket path inside the LLDAP server container
+lldap_database_postgres_socket_path_container: /run-postgres
+
+########################################################################
+#                                                                      #
+# /database                                                            #
+#                                                                      #
+########################################################################
 
 # Specify the timezone
 lldap_environment_variables_tz: UTC
