@@ -95,7 +95,9 @@ The password is used both for the LDAP bind and for the administration interface
 >[!NOTE]
 > Changing those values does not update them once the user is created. The password can be updated on the LLDAP's UI. If you lost it, you can set `force_ldap_user_pass_reset` to `true` on `lldap_config.docker_template.toml` inside the mounted data directory in order to force a reset of the admin password to the value specified to `lldap_environment_variables_lldap_ldap_user_pass`.
 
-### Specify database (optional)
+### Configuring database
+
+#### Specify database (optional)
 
 You can specify a database used by LLDAP. By default it is configured to use SQLite, and the SQLite database is stored in the directory specified with `lldap_data_path`.
 
@@ -109,7 +111,7 @@ Set `mysql` to use a MySQL compatible database.
 
 For other settings, check variables such as `lldap_database_postgres_*` and `lldap_database_mysql_*` on [`defaults/main.yml`](../defaults/main.yml).
 
-### Configuring connection to database server (optional)
+#### Configuring connection to the database server (optional)
 
 By default the role is configured to establish connection with the database server via the Unix socket. You can mount the Unix socket by adding the following configuration to your `vars.yml` file:
 
