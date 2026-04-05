@@ -262,22 +262,6 @@ lldap_database_postgres_password: ""
 lldap_database_postgres_sslmode: disable
 lldap_database_name: lldap
 
-lldap_environment_variables_lldap_database_url_mysql: |
-  mysql://{{ lldap_database_mysql_username }}:{{ lldap_database_mysql_password }}@
-  {%- if lldap_database_mysql_socket_enabled -%}
-  localhost/{{ lldap_database_name }}?socket={{ lldap_database_mysql_socket_path_container + '/mysqld.sock' }}
-  {%- else -%}
-  {{ lldap_database_mysql_hostname }}:{{ lldap_database_mysql_port }}/{{ lldap_database_name }}
-  {%- endif -%}
-
-lldap_environment_variables_lldap_database_url_postgres: |
-  postgres://{{ lldap_database_postgres_username }}:{{ lldap_database_postgres_password }}@
-  {%- if lldap_database_postgres_socket_enabled -%}
-  localhost/{{ lldap_database_name }}?host={{ lldap_database_postgres_socket_path_container }}
-  {%- else -%}
-  {{ lldap_database_postgres_hostname }}:{{ lldap_database_postgres_port }}/{{ lldap_database_name }}?sslmode={{ lldap_database_postgres_sslmode }}
-  {%- endif -%}
-
 # Control if the connection to MySQL is made via a Unix socket
 lldap_database_mysql_socket_enabled: true
 
@@ -295,6 +279,22 @@ lldap_database_postgres_socket_path_host: ""
 
 # Specify the path to the Postgres Unix socket path inside the LLDAP server container
 lldap_database_postgres_socket_path_container: /run-postgres
+
+lldap_environment_variables_lldap_database_url_mysql: |-
+  mysql://{{ lldap_database_mysql_username }}:{{ lldap_database_mysql_password }}@
+  {%- if lldap_database_mysql_socket_enabled -%}
+  localhost/{{ lldap_database_name }}?socket={{ lldap_database_mysql_socket_path_container + '/mysqld.sock' }}
+  {%- else -%}
+  {{ lldap_database_mysql_hostname }}:{{ lldap_database_mysql_port }}/{{ lldap_database_name }}
+  {%- endif -%}
+
+lldap_environment_variables_lldap_database_url_postgres: |-
+  postgres://{{ lldap_database_postgres_username }}:{{ lldap_database_postgres_password }}@
+  {%- if lldap_database_postgres_socket_enabled -%}
+  localhost/{{ lldap_database_name }}?host={{ lldap_database_postgres_socket_path_container }}
+  {%- else -%}
+  {{ lldap_database_postgres_hostname }}:{{ lldap_database_postgres_port }}/{{ lldap_database_name }}?sslmode={{ lldap_database_postgres_sslmode }}
+  {%- endif -%}
 
 ########################################################################
 #                                                                      #
