@@ -268,7 +268,7 @@ lldap_database_mysql_socket_enabled: true
 # Specify the path to the MySQL Unix socket path on the host (bind-mount source)
 lldap_database_mysql_socket_path_host: ""
 
-# Specify the path to the MySQL Unix socket path inside the LLDAP server container
+# Specify the path to the MySQL Unix socket path inside the LLDAP container
 lldap_database_mysql_socket_path_container: /run-mysqld
 
 # Control if the connection to Postgres is made via a Unix socket
@@ -277,7 +277,7 @@ lldap_database_postgres_socket_enabled: true
 # Specify the path to the Postgres Unix socket path on the host (bind-mount source)
 lldap_database_postgres_socket_path_host: ""
 
-# Specify the path to the Postgres Unix socket path inside the LLDAP server container
+# Specify the path to the Postgres Unix socket path inside the LLDAP container
 lldap_database_postgres_socket_path_container: /run-postgres
 
 lldap_environment_variables_lldap_database_url_mysql: |-
