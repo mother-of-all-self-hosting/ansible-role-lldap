@@ -40,7 +40,6 @@ lldap_container_image_tag: "{{ lldap_version }}-alpine-rootless"
 lldap_container_image_registry_prefix: "{{ lldap_container_image_registry_prefix_upstream }}"
 lldap_container_image_registry_prefix_upstream: "{{ lldap_container_image_registry_prefix_upstream_default }}"
 lldap_container_image_registry_prefix_upstream_default: docker.io/
-lldap_container_image_force_pull: "{{ lldap_container_image.endswith(':latest') }}"
 
 lldap_container_image_self_build: false
 lldap_container_image_self_build_name: "lldap/lldap:{{ lldap_container_image_self_build_repo_version }}"
