@@ -61,22 +61,14 @@
         force: "yes"
       register: lldap_git_pull_results
 
-    # Invoking the `docker build` command here, instead of calling the `docker_image` Ansible module,
-    # because the latter does not support BuildKit.
-    # See: https://github.com/ansible-collections/community.general/issues/514
     - name: Ensure LLDAP container image is built
-      ansible.builtin.shell:
-        chdir: "{{ lldap_container_image_self_build_src_files_path }}"
-        cmd: |
-          {{ devture_systemd_docker_base_host_command_docker }} build \
-          -t "{{ lldap_container_image_self_build_name }}" \
-          -f Dockerfile \
-          .
-      environment:
-        DOCKER_BUILDKIT: "1"
-        PYTHON: "/usr/bin/python3"
+      community.docker.docker_image_build:
+        name: "{{ lldap_container_image_self_build_name }}"
+        dockerfile: Dockerfile
+        path: "{{ lldap_container_image_self_build_src_files_path }}"
+        pull: true
+        rebuild: "{{ 'always' if lldap_git_pull_results.changed | bool else 'never' }}"
       register: lldap_container_image_build_result
-      changed_when: "'Successfully built' in lldap_container_image_build_result.stdout or ('writing image' in lldap_container_image_build_result.stderr and 'CACHED' not in lldap_container_image_build_result.stderr)"
 
 - name: Ensure LLDAP container network is created via community.docker.docker_network
   when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
