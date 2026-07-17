@@ -23,6 +23,12 @@
         fail_msg: "lldap.service not active ({{ lldap_service.status.ActiveState }})"
         success_msg: "lldap.service is active"
 
+    - name: Retrieve LLDAP service log for debugging
+      when: lldap_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu lldap.service
+      changed_when: false
+
     - name: Wait for LLDAP HTTP endpoint to respond (up to 10m)
       ansible.builtin.uri:
         url: "http://localhost:17170/"
