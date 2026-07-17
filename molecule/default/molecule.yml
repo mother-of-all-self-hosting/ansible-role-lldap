@@ -33,7 +33,8 @@ provisioner:
         # Variables for LLDAP
         lldap_uid: 1000
         lldap_gid: 1000
-        lldap_hostname: lldap
+        lldap_scheme: http
+        lldap_hostname: localhost
         lldap_container_labels_traefik_enabled: false
         lldap_container_http_host_bind_port: 17170
         lldap_environment_variables_lldap_jwt_secret: jwtsecret
