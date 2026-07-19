@@ -49,6 +49,10 @@ Currently these testing scenarios are available:
 
 Tests a standard LLDAP installation.
 
+### `mariadb`
+
+Tests a standard LLDAP installation with the MariaDB database.
+
 ### `postgres`
 
 Tests a standard LLDAP installation with the Postgres database.
