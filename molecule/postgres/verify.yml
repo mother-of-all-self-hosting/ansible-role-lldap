@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify LLDAP systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for LLDAP service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: lldap.service
+      register: lldap_service
+      until: lldap_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert LLDAP service is active
+      ansible.builtin.assert:
+        that: lldap_service.status.ActiveState == 'active'
+        fail_msg: "lldap.service not active ({{ lldap_service.status.ActiveState }})"
+        success_msg: "lldap.service is active"
+
+    - name: Retrieve LLDAP service log for debugging
+      when: lldap_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu lldap.service
+      changed_when: false
+
+    - name: Wait for LLDAP HTTP endpoint to respond (up to 10m)
+      ansible.builtin.uri:
+        url: "http://localhost:17170/"
+        method: GET
+        status_code: [200, 302]
+        follow_redirects: none
+      register: lldap_endpoint
+      until: lldap_endpoint.status in [200, 302]
+      retries: 120
+      delay: 5
+
+    - name: Assert LLDAP HTTP endpoint responds
+      ansible.builtin.assert:
+        that: lldap_endpoint.status in [200, 302]
+        fail_msg: "LLDAP did not respond as expected ({{ lldap_endpoint.status | default('no response') }})"
+        success_msg: "LLDAP responded with {{ lldap_endpoint.status }}"
+
+    - name: Show LLDAP systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "LLDAP systemd: {{ lldap_service.status.ActiveState }}"
+          - "LLDAP HTTP: {{ lldap_endpoint.status }}"
