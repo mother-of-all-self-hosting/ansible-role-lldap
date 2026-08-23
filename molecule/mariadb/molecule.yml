@@ -42,9 +42,9 @@ provisioner:
         lldap_environment_variables_lldap_key_seed: keyseed
         lldap_environment_variables_lldap_ldap_user_dn: username
         lldap_environment_variables_lldap_ldap_user_pass: password
-        lldap_database_type: mysql
 
         # Variables required for LLDAP to connect to the MariaDB database (via Unix socket)
+        lldap_database_type: mysql
         lldap_database_mysql_username: my_database_username
         lldap_database_mysql_password: my_database_password
         lldap_database_name: lldap

@@ -42,9 +42,9 @@ provisioner:
         lldap_environment_variables_lldap_key_seed: keyseed
         lldap_environment_variables_lldap_ldap_user_dn: username
         lldap_environment_variables_lldap_ldap_user_pass: password
-        lldap_database_type: postgres
 
         # Variables required for LLDAP to connect to the Postgres database (via Unix socket)
+        lldap_database_type: postgres
         lldap_database_postgres_username: my_database_username
         lldap_database_postgres_password: my_database_password
         lldap_database_postgres_sslmode: disable
