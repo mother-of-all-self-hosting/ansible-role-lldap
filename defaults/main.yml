@@ -16,7 +16,7 @@ lldap_identifier: lldap
 lldap_base_path: "/{{ lldap_identifier }}"
 lldap_data_path: "{{ lldap_base_path }}/data"
 
-# renovate: datasource=docker depName=lldap/lldap
+# renovate: datasource=docker depName=lldap/lldap versioning=semver
 lldap_version: v0.6.3
 
 lldap_uid: ""
