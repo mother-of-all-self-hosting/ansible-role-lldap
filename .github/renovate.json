@@ -1,5 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "Patch releases are deliberately not automerged here, unlike in most other roles in this fleet.",
+    "LLDAP is a 0.x project, so every release Renovate can offer within the 0.6 line is classified as a `patch` - but semver makes no compatibility promise below 1.0, and upstream uses that latitude. All three patch releases of the 0.6 line so far changed behavior that an unattended bump would change under a running directory: v0.6.1 was cut mainly to fix a broken schema migration (7 to 8) for Postgres and to make it automatic for SQLite; v0.6.2 made a missing JWT secret abort startup and stopped accepting attribute names that were previously creatable; v0.6.3 changed how the JWT `exp` and `iat` claims are serialized. `patch` here means what other projects call `minor`.",
+    "The container also migrates its own schema on startup, forward-only, and that schema holds every user, group and password hash that everything else authenticates against. Unlike a bump of an ordinary service, a bad one takes down logins everywhere at once, with no way back short of restoring a backup. This is the same reason the authentik and keycloak roles in this fleet decline patch automerge.",
+    "There is one more mismatch worth naming: Renovate checks that the tag it proposes exists, but the tag it checks is not the tag this role pulls. `lldap_version` is `vX.Y.Z`, while `lldap_container_image_tag` appends `-alpine-rootless`. Upstream has published the two together every time so far, but nothing verifies that before a merge.",
+    "The Molecule run on the pull request catches the loud versions of all of this, and is exactly the checkpoint that automerging would remove.",
+    "On the annotation in defaults/main.yml: `versioning=semver` is load-bearing. `lldap/lldap` publishes date-based tags (`2026-08-10`) alongside semver ones, plus a flavour suffix on each (`-alpine`, `-debian`, `-alpine-rootless`). Under semver the date tags are not versions at all (hyphens, not dots) and the flavour-suffixed ones parse as prereleases sorting below the release they belong to, so only the `vX.Y.Z` tags remain as candidates - which is the intent."
+  ],
   "extends": [
     "github>mother-of-all-self-hosting/renovate-config#v1.0.0"
   ]
