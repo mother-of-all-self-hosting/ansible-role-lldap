@@ -1,53 +1,61 @@
 # SPDX-FileCopyrightText: 2026 spatterlight
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify LLDAP systemd service
+- name: Verify LLDAP
   hosts: all
   become: true
   gather_facts: false
   tasks:
-    - name: Wait for LLDAP service to become active (up to 180s)
-      ansible.builtin.systemd:
-        name: lldap.service
-      register: lldap_service
-      until: lldap_service.status.ActiveState == 'active'
-      retries: 36
-      delay: 5
+    - name: Run the checks shared by all LLDAP scenarios
+      ansible.builtin.include_tasks:
+        file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/resources/tasks/verify_lldap.yml"
 
-    - name: Assert LLDAP service is active
-      ansible.builtin.assert:
-        that: lldap_service.status.ActiveState == 'active'
-        fail_msg: "lldap.service not active ({{ lldap_service.status.ActiveState }})"
-        success_msg: "lldap.service is active"
-
-    - name: Retrieve LLDAP service log for debugging
-      when: lldap_debug_service_enabled | bool
+    # Pointing `lldap_database_type` at `mysql` is only worth testing if it
+    # actually moves the data. Asking MariaDB itself for the user that was
+    # created over GraphQL is what settles that; a `LLDAP_DATABASE_URL` in the
+    # env file would look just as convincing while LLDAP quietly kept using
+    # SQLite.
+    - name: Read the users LLDAP stored, out of the MariaDB database
       ansible.builtin.command:
-        cmd: journalctl -xeu lldap.service
+        argv:
+          - docker
+          - exec
+          - "--env=MYSQL_PWD={{ mariadb_root_password }}"
+          - "{{ mariadb_identifier }}"
+          - mariadb
+          - "--user=root"
+          - --batch
+          - --skip-column-names
+          - "--execute=SELECT user_id FROM users ORDER BY user_id"
+          - "{{ lldap_database_name }}"
+      register: lldap_mariadb_users
       changed_when: false
 
-    - name: Wait for LLDAP HTTP endpoint to respond (up to 10m)
-      ansible.builtin.uri:
-        url: "http://localhost:17170/"
-        method: GET
-        status_code: [200, 302]
-        follow_redirects: none
-      register: lldap_endpoint
-      until: lldap_endpoint.status in [200, 302]
-      retries: 120
-      delay: 5
-
-    - name: Assert LLDAP HTTP endpoint responds
+    - name: Assert that the MariaDB database holds both users
       ansible.builtin.assert:
-        that: lldap_endpoint.status in [200, 302]
-        fail_msg: "LLDAP did not respond as expected ({{ lldap_endpoint.status | default('no response') }})"
-        success_msg: "LLDAP responded with {{ lldap_endpoint.status }}"
+        that: >-
+          lldap_mariadb_users.stdout_lines | sort
+          ==
+          [lldap_environment_variables_lldap_ldap_user_dn, lldap_molecule_probe_username] | sort
+        fail_msg: >-
+          The `{{ lldap_database_name }}` database holds {{ lldap_mariadb_users.stdout_lines }},
+          not the admin user and `{{ lldap_molecule_probe_username }}`
+        success_msg: "The `{{ lldap_database_name }}` MariaDB database holds both users"
 
-    - name: Show LLDAP systemd service status summary
-      ansible.builtin.debug:
-        msg:
-          - "LLDAP systemd: {{ lldap_service.status.ActiveState }}"
-          - "LLDAP HTTP: {{ lldap_endpoint.status }}"
+    - name: Check whether LLDAP also wrote a SQLite database
+      ansible.builtin.stat:
+        path: "{{ lldap_molecule_sqlite_path }}"
+      register: lldap_sqlite_file
+
+    # The counterpart of the check above: LLDAP falling back to SQLite while
+    # MariaDB happened to be reachable would leave both stores populated and
+    # the assertion above still green.
+    - name: Assert that LLDAP did not fall back to SQLite
+      ansible.builtin.assert:
+        that: not lldap_sqlite_file.stat.exists
+        fail_msg: "LLDAP wrote a SQLite database at `{{ lldap_molecule_sqlite_path }}` despite being pointed at MariaDB"
+        success_msg: "LLDAP wrote no SQLite database, so MariaDB is its only store"

@@ -1,53 +1,46 @@
 # SPDX-FileCopyrightText: 2026 spatterlight
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify LLDAP systemd service
+- name: Verify LLDAP
   hosts: all
   become: true
   gather_facts: false
   tasks:
-    - name: Wait for LLDAP service to become active (up to 180s)
-      ansible.builtin.systemd:
-        name: lldap.service
-      register: lldap_service
-      until: lldap_service.status.ActiveState == 'active'
-      retries: 36
-      delay: 5
+    - name: Run the checks shared by all LLDAP scenarios
+      ansible.builtin.include_tasks:
+        file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/resources/tasks/verify_lldap.yml"
 
-    - name: Assert LLDAP service is active
-      ansible.builtin.assert:
-        that: lldap_service.status.ActiveState == 'active'
-        fail_msg: "lldap.service not active ({{ lldap_service.status.ActiveState }})"
-        success_msg: "lldap.service is active"
-
-    - name: Retrieve LLDAP service log for debugging
-      when: lldap_debug_service_enabled | bool
+    # This scenario leaves `lldap_database_type` at its `sqlite` default, so
+    # the store has to be the file LLDAP keeps in its data directory. Reading
+    # the probe user straight out of that file - rather than trusting the
+    # `LLDAP_DATABASE_URL` we wrote into the env file - is what proves SQLite
+    # is the backend actually carrying the data.
+    - name: Read the users LLDAP stored, out of its SQLite database
       ansible.builtin.command:
-        cmd: journalctl -xeu lldap.service
+        argv:
+          - python3
+          - "-c"
+          - |
+            import sqlite3
+            import sys
+
+            connection = sqlite3.connect('file:%s?mode=ro' % sys.argv[1], uri=True)
+            print(','.join(row[0] for row in connection.execute('SELECT user_id FROM users ORDER BY user_id')))
+          - "{{ lldap_molecule_sqlite_path }}"
+      register: lldap_sqlite_users
       changed_when: false
 
-    - name: Wait for LLDAP HTTP endpoint to respond (up to 10m)
-      ansible.builtin.uri:
-        url: "http://localhost:17170/"
-        method: GET
-        status_code: [200, 302]
-        follow_redirects: none
-      register: lldap_endpoint
-      until: lldap_endpoint.status in [200, 302]
-      retries: 120
-      delay: 5
-
-    - name: Assert LLDAP HTTP endpoint responds
+    - name: Assert that the SQLite database holds both users
       ansible.builtin.assert:
-        that: lldap_endpoint.status in [200, 302]
-        fail_msg: "LLDAP did not respond as expected ({{ lldap_endpoint.status | default('no response') }})"
-        success_msg: "LLDAP responded with {{ lldap_endpoint.status }}"
-
-    - name: Show LLDAP systemd service status summary
-      ansible.builtin.debug:
-        msg:
-          - "LLDAP systemd: {{ lldap_service.status.ActiveState }}"
-          - "LLDAP HTTP: {{ lldap_endpoint.status }}"
+        that: >-
+          lldap_sqlite_users.stdout.split(',') | sort
+          ==
+          [lldap_environment_variables_lldap_ldap_user_dn, lldap_molecule_probe_username] | sort
+        fail_msg: >-
+          `{{ lldap_molecule_sqlite_path }}` holds `{{ lldap_sqlite_users.stdout }}`,
+          not the admin user and `{{ lldap_molecule_probe_username }}`
+        success_msg: "The SQLite database at `{{ lldap_molecule_sqlite_path }}` holds both users"

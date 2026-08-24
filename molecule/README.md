@@ -47,7 +47,7 @@ Currently these testing scenarios are available:
 
 ### `default`
 
-Tests a standard LLDAP installation.
+Tests a standard LLDAP installation, storing its data in SQLite.
 
 ### `mariadb`
 
@@ -56,6 +56,17 @@ Tests a standard LLDAP installation with the MariaDB database.
 ### `postgres`
 
 Tests a standard LLDAP installation with the Postgres database.
+
+## What the scenarios check
+
+LLDAP has two surfaces that both have to work, and that have to work against the same data: an LDAP server on port 3890 and a web/GraphQL API on port 17170. A systemd service that is `active` proves neither of them, so every scenario runs the checks in [`resources/tasks/verify_lldap.yml`](./resources/tasks/verify_lldap.yml):
+
+- a **real LDAP bind** on port 3890, spoken over a raw socket by [`resources/ldap_probe.py`](./resources/ldap_probe.py), which encodes LDAP's BER messages by hand and needs nothing but python3. The admin credentials this role configured must bind successfully, and — asked first, as a negative control — a wrong password must be refused with result code 49 (`invalidCredentials`)
+- the bind DN is built from a base DN the scenario deliberately sets to something other than the role's default, so a successful bind also proves the role passed that value through to the server
+- the GraphQL API must **refuse an unauthenticated caller** with a 401, and must accept the admin's JWT
+- a user is **created over GraphQL and then searched for over LDAP**. Both halves matter: LDAP is asked for that user before it is created (it must not be there) and after (it must be, at exactly the expected DN). This is what makes the two ports one service instead of two processes that happen to be listening
+- the running container is asked which version it is (`lldap --version` reports what was compiled in, not the tag it was pulled under) and it must be the version `defaults/main.yml` asks for
+- the **database backend** is asked directly for the user that was created over GraphQL — SQLite, MariaDB or Postgres, depending on the scenario. The two server-backed scenarios additionally assert that no SQLite database was written, so that a silent fallback cannot pass
 
 ## Running
 

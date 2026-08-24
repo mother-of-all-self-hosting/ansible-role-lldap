@@ -30,6 +30,11 @@ provisioner:
       all:
         # Helper variables
         lldap_debug_service_enabled: false
+        # The user that verify.yml creates over the GraphQL API and then looks
+        # for over LDAP. It must not be one LLDAP creates by itself.
+        lldap_molecule_probe_username: molecule-probe
+        # Where the SQLite database would land, if this scenario used one.
+        lldap_molecule_sqlite_path: /lldap/data/users.db
 
         # Variables for LLDAP
         lldap_uid: 1000
@@ -38,10 +43,14 @@ provisioner:
         lldap_hostname: localhost
         lldap_container_labels_traefik_enabled: false
         lldap_container_http_host_bind_port: 17170
+        lldap_container_ldap_host_bind_port: 3890
         lldap_environment_variables_lldap_jwt_secret: jwtsecret
         lldap_environment_variables_lldap_key_seed: keyseed
         lldap_environment_variables_lldap_ldap_user_dn: username
         lldap_environment_variables_lldap_ldap_user_pass: password
+        # Deliberately not the role's default base DN, so that binding under
+        # it proves the role passed this value through to the server.
+        lldap_environment_variables_lldap_ldap_base_dn: dc=molecule,dc=example,dc=com
 
         # Variables required for LLDAP to connect to the MariaDB database (via Unix socket)
         lldap_database_type: mysql
@@ -56,6 +65,7 @@ provisioner:
           }}
 
         # Variables for MariaDB
+        mariadb_identifier: mariadb
         mariadb_uid: 1000
         mariadb_gid: 1000
         mariadb_root_password: mariadb_password

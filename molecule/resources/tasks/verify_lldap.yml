@@ -1,0 +1,263 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+# The checks that every scenario runs, regardless of which database backend
+# LLDAP was pointed at. Scenarios include this file from their own verify.yml
+# and then add whatever proves their particular backend was engaged.
+#
+# LLDAP has two surfaces that have to work, and they have to work against the
+# same data: an LDAP server on port 3890, and a web/GraphQL API on port 17170.
+# A service that is `active` proves neither, so nothing here settles for that.
+
+- name: Load the role's defaults, for the literals the role ships with
+  # Only values that are plain literals in defaults/main.yml may be read from
+  # here - anything containing Jinja would be evaluated in this playbook's
+  # scope, where the role's other variables do not exist. Everything the
+  # scenario itself decides comes from group_vars in molecule.yml instead.
+  ansible.builtin.include_vars:
+    file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+    name: lldap_role_defaults
+
+- name: Wait for the LLDAP systemd service to become active (up to 3m)
+  ansible.builtin.systemd_service:
+    name: lldap.service
+  register: lldap_service
+  until: lldap_service.status.ActiveState == 'active'
+  retries: 36
+  delay: 5
+
+- name: Assert that the LLDAP systemd service is active
+  ansible.builtin.assert:
+    that: lldap_service.status.ActiveState == 'active'
+    fail_msg: "lldap.service is {{ lldap_service.status.ActiveState }}, not active"
+    success_msg: "lldap.service is active"
+
+- name: Retrieve the LLDAP service log for debugging
+  when: lldap_debug_service_enabled | bool
+  ansible.builtin.command:
+    cmd: journalctl -xeu lldap.service
+  changed_when: false
+
+- name: Install the LDAP probe
+  ansible.builtin.copy:
+    src: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/resources/ldap_probe.py"
+    dest: /usr/local/bin/lldap-molecule-probe.py
+    mode: "0755"
+
+########################################################################
+#                                                                      #
+# LDAP surface                                                         #
+#                                                                      #
+########################################################################
+
+# Deliberately the first thing asked of the LDAP server, and deliberately a
+# question whose right answer is a refusal. Anything that follows is only
+# worth believing if this rejects a wrong password - a probe that reported
+# success unconditionally, or one talking to something that is not LDAP,
+# would fail here rather than quietly passing everything.
+- name: Bind over LDAP with a deliberately wrong password (negative control)
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lldap-molecule-probe.py
+      - "127.0.0.1"
+      - "{{ lldap_container_ldap_host_bind_port }}"
+      - "uid={{ lldap_environment_variables_lldap_ldap_user_dn }},ou=people,{{ lldap_environment_variables_lldap_ldap_base_dn }}"
+      - "definitely-not-{{ lldap_environment_variables_lldap_ldap_user_pass }}"
+  register: lldap_wrong_password_bind
+  # Retried because the LDAP listener only starts once the database schema has
+  # been migrated, which can take a while on a cold container.
+  until: lldap_wrong_password_bind.rc == 0
+  retries: 60
+  delay: 5
+  changed_when: false
+
+- name: Assert that LDAP rejects a wrong password with invalidCredentials
+  ansible.builtin.assert:
+    that: (lldap_wrong_password_bind.stdout | from_json).bind_result_code == 49
+    fail_msg: >-
+      A bind with a wrong password returned result code
+      {{ (lldap_wrong_password_bind.stdout | from_json).bind_result_code }}
+      instead of 49 (invalidCredentials)
+    success_msg: "A bind with a wrong password is rejected with invalidCredentials (49)"
+
+- name: Bind over LDAP as the admin user the role configured
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lldap-molecule-probe.py
+      - "127.0.0.1"
+      - "{{ lldap_container_ldap_host_bind_port }}"
+      - "uid={{ lldap_environment_variables_lldap_ldap_user_dn }},ou=people,{{ lldap_environment_variables_lldap_ldap_base_dn }}"
+      - "{{ lldap_environment_variables_lldap_ldap_user_pass }}"
+      - "{{ lldap_environment_variables_lldap_ldap_base_dn }}"
+      - uid
+      - "{{ lldap_molecule_probe_username }}"
+  register: lldap_admin_bind
+  changed_when: false
+
+# The bind DN is built from the base DN the scenario asked for, which is not
+# the role's default one. Succeeding therefore proves the role passed both the
+# base DN and the admin credentials through to the server, rather than the
+# server having fallen back to its own defaults.
+- name: Assert that the configured admin credentials bind successfully
+  ansible.builtin.assert:
+    that: (lldap_admin_bind.stdout | from_json).bind_result_code == 0
+    fail_msg: >-
+      Binding as the configured admin user returned result code
+      {{ (lldap_admin_bind.stdout | from_json).bind_result_code }} instead of 0 (success)
+    success_msg: "The configured admin user binds successfully over LDAP"
+
+- name: Assert that the user about to be created does not exist yet (negative control)
+  ansible.builtin.assert:
+    that: (lldap_admin_bind.stdout | from_json).entries | length == 0
+    fail_msg: >-
+      LDAP already knows about `{{ lldap_molecule_probe_username }}`
+      ({{ (lldap_admin_bind.stdout | from_json).entries | join(', ') }}),
+      so finding it later would prove nothing
+    success_msg: "LDAP does not know `{{ lldap_molecule_probe_username }}` yet"
+
+########################################################################
+#                                                                      #
+# Web/API surface                                                      #
+#                                                                      #
+########################################################################
+
+- name: Wait for the LLDAP web interface to respond (up to 5m)
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ lldap_container_http_host_bind_port }}/"
+    method: GET
+    status_code: [200]
+    follow_redirects: none
+  register: lldap_web_interface
+  until: lldap_web_interface.status == 200
+  retries: 60
+  delay: 5
+
+- name: Call the GraphQL API without a token (negative control)
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ lldap_container_http_host_bind_port }}/api/graphql"
+    method: POST
+    status_code: [401]
+    body_format: json
+    body:
+      query: "{ apiVersion }"
+  register: lldap_unauthenticated_api_call
+
+- name: Assert that the GraphQL API refuses unauthenticated callers
+  ansible.builtin.assert:
+    that: lldap_unauthenticated_api_call.status == 401
+    fail_msg: "An unauthenticated GraphQL call was answered with {{ lldap_unauthenticated_api_call.status }}, not 401"
+    success_msg: "The GraphQL API refuses unauthenticated callers with 401"
+
+- name: Log in to the web API as the admin user the role configured
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ lldap_container_http_host_bind_port }}/auth/simple/login"
+    method: POST
+    status_code: [200]
+    body_format: json
+    body:
+      username: "{{ lldap_environment_variables_lldap_ldap_user_dn }}"
+      password: "{{ lldap_environment_variables_lldap_ldap_user_pass }}"
+  register: lldap_login
+
+- name: Assert that logging in yields an admin token
+  ansible.builtin.assert:
+    that:
+      - lldap_login.json.token | default('') | length > 0
+      - lldap_login.json.token.split('.') | length == 3
+    fail_msg: "Logging in did not return a JWT"
+    success_msg: "Logging in as the configured admin user returns a JWT"
+
+- name: Create a user through the GraphQL API
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ lldap_container_http_host_bind_port }}/api/graphql"
+    method: POST
+    status_code: [200]
+    headers:
+      Authorization: "Bearer {{ lldap_login.json.token }}"
+    body_format: json
+    body:
+      query: "mutation($user: CreateUserInput!) { createUser(user: $user) { id email displayName } }"
+      variables:
+        user:
+          id: "{{ lldap_molecule_probe_username }}"
+          email: "{{ lldap_molecule_probe_username }}@example.com"
+          displayName: Molecule Probe
+  register: lldap_created_user
+
+# GraphQL reports failures with a 200 and an `errors` key, so the status code
+# alone says nothing about whether the user was actually created.
+- name: Assert that the GraphQL API created the user
+  ansible.builtin.assert:
+    that:
+      - "'errors' not in lldap_created_user.json"
+      - lldap_created_user.json.data.createUser.id == lldap_molecule_probe_username
+    fail_msg: "Creating a user through GraphQL did not work: {{ lldap_created_user.json }}"
+    success_msg: "The GraphQL API created `{{ lldap_molecule_probe_username }}`"
+
+########################################################################
+#                                                                      #
+# The two surfaces share their state                                   #
+#                                                                      #
+########################################################################
+
+- name: Search LDAP for the user that was created through the GraphQL API
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lldap-molecule-probe.py
+      - "127.0.0.1"
+      - "{{ lldap_container_ldap_host_bind_port }}"
+      - "uid={{ lldap_environment_variables_lldap_ldap_user_dn }},ou=people,{{ lldap_environment_variables_lldap_ldap_base_dn }}"
+      - "{{ lldap_environment_variables_lldap_ldap_user_pass }}"
+      - "{{ lldap_environment_variables_lldap_ldap_base_dn }}"
+      - uid
+      - "{{ lldap_molecule_probe_username }}"
+  register: lldap_search_for_created_user
+  changed_when: false
+
+# The same user, written through one surface and read back through the other.
+# This is what makes the two ports one service rather than two processes that
+# both happen to be listening.
+- name: Assert that LDAP now returns the user created over GraphQL
+  ansible.builtin.assert:
+    that:
+      - (lldap_search_for_created_user.stdout | from_json).search_result_code == 0
+      - (lldap_search_for_created_user.stdout | from_json).entries == [
+          'uid=' ~ lldap_molecule_probe_username ~ ',ou=people,' ~ lldap_environment_variables_lldap_ldap_base_dn]
+    fail_msg: >-
+      LDAP returned {{ (lldap_search_for_created_user.stdout | from_json).entries }}
+      for `{{ lldap_molecule_probe_username }}`, which was just created over GraphQL
+    success_msg: "The user created over GraphQL is returned by LDAP, so both surfaces share one store"
+
+########################################################################
+#                                                                      #
+# Version                                                              #
+#                                                                      #
+########################################################################
+
+- name: Ask the running container which LLDAP version it is
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ lldap_role_defaults.lldap_identifier }}"
+      - /app/lldap
+      - --version
+  register: lldap_reported_version
+  changed_when: false
+
+# Asserted against the literal in defaults/main.yml, so that a bump which
+# resolves to an image that does not contain the version it claims to - a
+# mistyped tag, a stale local image, a registry serving something else under
+# that name - fails here instead of shipping. `lldap --version` reports what
+# was compiled in, not the tag it was pulled under.
+- name: Assert that the running version is the one defaults/main.yml asks for
+  ansible.builtin.assert:
+    that: >-
+      lldap_reported_version.stdout is match('lldap ' ~
+      (lldap_role_defaults.lldap_version | regex_replace('^v', '') | regex_escape) ~ '($|[^0-9.])')
+    fail_msg: >-
+      The container reports `{{ lldap_reported_version.stdout }}`,
+      which is not the `{{ lldap_role_defaults.lldap_version }}` that defaults/main.yml asks for
+    success_msg: "The container runs LLDAP {{ lldap_role_defaults.lldap_version }}, as defaults/main.yml asks for"
