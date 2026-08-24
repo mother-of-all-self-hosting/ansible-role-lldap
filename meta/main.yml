@@ -1,9 +1,9 @@
 ---
 galaxy_info:
-  author: Suguru Hirahara
-  company: progressiv
+  author: mash
+  company: mash
   role_name: lldap
-  namespace: progressiv
+  namespace: mash
   description: LLDAP
   platforms:
     - name: Debian
