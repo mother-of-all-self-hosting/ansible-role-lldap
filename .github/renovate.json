@@ -9,6 +9,6 @@
     "On the annotation in defaults/main.yml: `versioning=semver` is load-bearing. `lldap/lldap` publishes date-based tags (`2026-08-10`) alongside semver ones, plus a flavour suffix on each (`-alpine`, `-debian`, `-alpine-rootless`). Under semver the date tags are not versions at all (hyphens, not dots) and the flavour-suffixed ones parse as prereleases sorting below the release they belong to, so only the `vX.Y.Z` tags remain as candidates - which is the intent."
   ],
   "extends": [
-    "github>mother-of-all-self-hosting/renovate-config#v1.0.0"
+    "github>mother-of-all-self-hosting/renovate-config#v1.1.0"
   ]
 }
