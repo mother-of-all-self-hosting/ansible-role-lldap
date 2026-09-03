@@ -12,7 +12,7 @@
   tasks:
     - name: Run the checks shared by all LLDAP scenarios
       ansible.builtin.include_tasks:
-        file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/resources/tasks/verify_lldap.yml"
+        file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
 
     # Pointing `lldap_database_type` at `postgres` is only worth testing if it
     # actually moves the data. Asking Postgres itself for the user that was
