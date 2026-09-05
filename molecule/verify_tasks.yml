@@ -251,12 +251,10 @@
 # mistyped tag, a stale local image, a registry serving something else under
 # that name - fails here instead of shipping. `lldap --version` reports what
 # was compiled in, not the tag it was pulled under.
-- name: Assert that the running version is the one defaults/main.yml asks for
+- name: Assert the running LLDAP is the version this role installs
   ansible.builtin.assert:
     that: >-
       lldap_reported_version.stdout is match('lldap ' ~
       (lldap_defaults.lldap_version | regex_replace('^v', '') | regex_escape) ~ '($|[^0-9.])')
-    fail_msg: >-
-      The container reports `{{ lldap_reported_version.stdout }}`,
-      which is not the `{{ lldap_defaults.lldap_version }}` that defaults/main.yml asks for
-    success_msg: "The container runs LLDAP {{ lldap_defaults.lldap_version }}, as defaults/main.yml asks for"
+    fail_msg: "LLDAP reports {{ lldap_reported_version.stdout | default('none') }}, expected {{ lldap_defaults.lldap_version }}"
+    success_msg: "LLDAP reports {{ lldap_reported_version.stdout }}"
