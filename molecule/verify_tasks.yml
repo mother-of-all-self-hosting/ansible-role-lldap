@@ -235,7 +235,7 @@
 #                                                                      #
 ########################################################################
 
-- name: Ask the running container which LLDAP version it is
+- name: Query the version of the running LLDAP
   ansible.builtin.command:
     argv:
       - docker
