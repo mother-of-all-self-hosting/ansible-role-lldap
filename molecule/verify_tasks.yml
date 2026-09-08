@@ -249,7 +249,7 @@
       - "{{ lldap_defaults.lldap_identifier }}"
       - /app/lldap
       - --version
-  register: lldap_reported_version
+  register: lldap_version_reported
   changed_when: false
 
 # Asserted against the literal in defaults/main.yml, so that a bump which
@@ -260,7 +260,7 @@
 - name: Assert the running LLDAP is the version this role installs
   ansible.builtin.assert:
     that: >-
-      lldap_reported_version.stdout is match('lldap ' ~
+      lldap_version_reported.stdout is match('lldap ' ~
       (lldap_defaults.lldap_version | regex_replace('^v', '') | regex_escape) ~ '($|[^0-9.])')
-    fail_msg: "LLDAP reports {{ lldap_reported_version.stdout | default('none') }}, expected {{ lldap_defaults.lldap_version }}"
-    success_msg: "LLDAP reports {{ lldap_reported_version.stdout }}"
+    fail_msg: "LLDAP reports {{ lldap_version_reported.stdout | default('none') }}, expected {{ lldap_defaults.lldap_version }}"
+    success_msg: "LLDAP reports {{ lldap_version_reported.stdout }}"
