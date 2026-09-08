@@ -243,12 +243,9 @@
 
 - name: Query the version of the running LLDAP
   ansible.builtin.command:
-    argv:
-      - docker
-      - exec
-      - "{{ lldap_defaults.lldap_identifier }}"
-      - /app/lldap
-      - --version
+    cmd: >-
+      docker exec {{ lldap_defaults.lldap_identifier }}
+      /app/lldap --version
   register: lldap_version_reported
   changed_when: false
 
