@@ -12,52 +12,52 @@
   tasks:
     - name: Verify that LLDAP works
       block:
-    - name: Run the checks shared by all LLDAP scenarios
-      ansible.builtin.include_tasks:
-        file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
+        - name: Run the checks shared by all LLDAP scenarios
+          ansible.builtin.include_tasks:
+            file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
 
-    # Verify LLDAP stores data on the database actually by asking MariaDB itself for the user that was
-    # created over GraphQL.
-    - name: Read the users LLDAP stored, out of the MariaDB database
-      ansible.builtin.command:
-        argv:
-          - docker
-          - exec
-          - "--env=MYSQL_PWD={{ mariadb_root_password }}"
-          - "{{ mariadb_identifier }}"
-          - mariadb
-          - "--user=root"
-          - --batch
-          - --skip-column-names
-          - "--execute=SELECT user_id FROM users ORDER BY user_id"
-          - "{{ lldap_database_name }}"
-      register: lldap_mariadb_users
-      changed_when: false
+        # Verify LLDAP stores data on the database actually by asking MariaDB itself for the user that was
+        # created over GraphQL.
+        - name: Read the users LLDAP stored, out of the MariaDB database
+          ansible.builtin.command:
+            argv:
+              - docker
+              - exec
+              - "--env=MYSQL_PWD={{ mariadb_root_password }}"
+              - "{{ mariadb_identifier }}"
+              - mariadb
+              - "--user=root"
+              - --batch
+              - --skip-column-names
+              - "--execute=SELECT user_id FROM users ORDER BY user_id"
+              - "{{ lldap_database_name }}"
+          register: lldap_mariadb_users
+          changed_when: false
 
-    - name: Assert that the MariaDB database holds both users
-      ansible.builtin.assert:
-        that: >-
-          lldap_mariadb_users.stdout_lines | sort
-          ==
-          [lldap_environment_variables_lldap_ldap_user_dn, lldap_molecule_probe_username] | sort
-        fail_msg: >-
-          The `{{ lldap_database_name }}` database holds {{ lldap_mariadb_users.stdout_lines }},
-          not the admin user and `{{ lldap_molecule_probe_username }}`
-        success_msg: "The `{{ lldap_database_name }}` MariaDB database holds both users"
+        - name: Assert that the MariaDB database holds both users
+          ansible.builtin.assert:
+            that: >-
+              lldap_mariadb_users.stdout_lines | sort
+              ==
+              [lldap_environment_variables_lldap_ldap_user_dn, lldap_molecule_probe_username] | sort
+            fail_msg: >-
+              The `{{ lldap_database_name }}` database holds {{ lldap_mariadb_users.stdout_lines }},
+              not the admin user and `{{ lldap_molecule_probe_username }}`
+            success_msg: "The `{{ lldap_database_name }}` MariaDB database holds both users"
 
-    - name: Check whether LLDAP also wrote a SQLite database
-      ansible.builtin.stat:
-        path: "{{ lldap_molecule_sqlite_path }}"
-      register: lldap_sqlite_file
+        - name: Check whether LLDAP also wrote a SQLite database
+          ansible.builtin.stat:
+            path: "{{ lldap_molecule_sqlite_path }}"
+          register: lldap_sqlite_file
 
-    # The counterpart of the check above: LLDAP falling back to SQLite while
-    # MariaDB happened to be reachable would leave both stores populated and
-    # the assertion above still green.
-    - name: Assert that LLDAP did not fall back to SQLite
-      ansible.builtin.assert:
-        that: not lldap_sqlite_file.stat.exists
-        fail_msg: "LLDAP wrote a SQLite database at `{{ lldap_molecule_sqlite_path }}` despite being pointed at MariaDB"
-        success_msg: "LLDAP wrote no SQLite database, so MariaDB is its only store"
+        # The counterpart of the check above: LLDAP falling back to SQLite while
+        # MariaDB happened to be reachable would leave both stores populated and
+        # the assertion above still green.
+        - name: Assert that LLDAP did not fall back to SQLite
+          ansible.builtin.assert:
+            that: not lldap_sqlite_file.stat.exists
+            fail_msg: "LLDAP wrote a SQLite database at `{{ lldap_molecule_sqlite_path }}` despite being pointed at MariaDB"
+            success_msg: "LLDAP wrote no SQLite database, so MariaDB is its only store"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.

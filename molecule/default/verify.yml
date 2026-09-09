@@ -12,36 +12,36 @@
   tasks:
     - name: Verify that LLDAP works
       block:
-    - name: Run the checks shared by all LLDAP scenarios
-      ansible.builtin.include_tasks:
-        file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
+        - name: Run the checks shared by all LLDAP scenarios
+          ansible.builtin.include_tasks:
+            file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
 
-    # Verify LLDAP stores data on the database actually by reading the probe user straight out of that file.
-    - name: Read the users LLDAP stored, out of its SQLite database
-      ansible.builtin.command:
-        argv:
-          - python3
-          - "-c"
-          - |
-            import sqlite3
-            import sys
+        # Verify LLDAP stores data on the database actually by reading the probe user straight out of that file.
+        - name: Read the users LLDAP stored, out of its SQLite database
+          ansible.builtin.command:
+            argv:
+              - python3
+              - "-c"
+              - |
+                import sqlite3
+                import sys
 
-            connection = sqlite3.connect('file:%s?mode=ro' % sys.argv[1], uri=True)
-            print(','.join(row[0] for row in connection.execute('SELECT user_id FROM users ORDER BY user_id')))
-          - "{{ lldap_molecule_sqlite_path }}"
-      register: lldap_sqlite_users
-      changed_when: false
+                connection = sqlite3.connect('file:%s?mode=ro' % sys.argv[1], uri=True)
+                print(','.join(row[0] for row in connection.execute('SELECT user_id FROM users ORDER BY user_id')))
+              - "{{ lldap_molecule_sqlite_path }}"
+          register: lldap_sqlite_users
+          changed_when: false
 
-    - name: Assert that the SQLite database holds both users
-      ansible.builtin.assert:
-        that: >-
-          lldap_sqlite_users.stdout.split(',') | sort
-          ==
-          [lldap_environment_variables_lldap_ldap_user_dn, lldap_molecule_probe_username] | sort
-        fail_msg: >-
-          `{{ lldap_molecule_sqlite_path }}` holds `{{ lldap_sqlite_users.stdout }}`,
-          not the admin user and `{{ lldap_molecule_probe_username }}`
-        success_msg: "The SQLite database at `{{ lldap_molecule_sqlite_path }}` holds both users"
+        - name: Assert that the SQLite database holds both users
+          ansible.builtin.assert:
+            that: >-
+              lldap_sqlite_users.stdout.split(',') | sort
+              ==
+              [lldap_environment_variables_lldap_ldap_user_dn, lldap_molecule_probe_username] | sort
+            fail_msg: >-
+              `{{ lldap_molecule_sqlite_path }}` holds `{{ lldap_sqlite_users.stdout }}`,
+              not the admin user and `{{ lldap_molecule_probe_username }}`
+            success_msg: "The SQLite database at `{{ lldap_molecule_sqlite_path }}` holds both users"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.
