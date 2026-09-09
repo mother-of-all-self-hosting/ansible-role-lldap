@@ -10,6 +10,8 @@
   become: true
   gather_facts: false
   tasks:
+    - name: Verify that LLDAP works
+      block:
     - name: Run the checks shared by all LLDAP scenarios
       ansible.builtin.include_tasks:
         file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
@@ -56,3 +58,19 @@
         that: not lldap_sqlite_file.stat.exists
         fail_msg: "LLDAP wrote a SQLite database at `{{ lldap_molecule_sqlite_path }}` despite being pointed at MariaDB"
         success_msg: "LLDAP wrote no SQLite database, so MariaDB is its only store"
+
+      rescue:
+        # Whatever went wrong, the reason is almost always in the systemd service log.
+        - name: Retrieve the LLDAP systemd service log
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=lldap.service
+          register: lldap_service_log
+          changed_when: false
+
+        - name: Show the LLDAP systemd service log
+          ansible.builtin.debug:
+            var: lldap_service_log.stdout_lines
+
+        - name: Fail because verification did not pass
+          ansible.builtin.fail:
+            msg: "LLDAP verification failed. The systemd service log is printed above."
