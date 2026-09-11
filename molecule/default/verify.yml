@@ -9,6 +9,11 @@
   hosts: all
   become: true
   gather_facts: false
+
+  vars:
+    lldap_verify_units:
+      - lldap.service
+
   tasks:
     - name: Verify that LLDAP works
       block:
@@ -42,6 +47,12 @@
               `{{ lldap_molecule_sqlite_path }}` holds `{{ lldap_sqlite_users.stdout }}`,
               not the admin user and `{{ lldap_molecule_probe_username }}`
             success_msg: "The SQLite database at `{{ lldap_molecule_sqlite_path }}` holds both users"
+
+        - name: Show the LLDAP verification summary
+          ansible.builtin.debug:
+            msg:
+              - "LLDAP systemd: {% for unit, state in lldap_verify_units | zip(lldap_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
+              - "LLDAP version: {{ lldap_version_reported.stdout }}"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.

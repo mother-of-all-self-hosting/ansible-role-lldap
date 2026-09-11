@@ -9,6 +9,12 @@
   hosts: all
   become: true
   gather_facts: false
+
+  vars:
+    lldap_verify_units:
+      - lldap.service
+      - mariadb.service
+
   tasks:
     - name: Verify that LLDAP works
       block:
@@ -58,6 +64,12 @@
             that: not lldap_sqlite_file.stat.exists
             fail_msg: "LLDAP wrote a SQLite database at `{{ lldap_molecule_sqlite_path }}` despite being pointed at MariaDB"
             success_msg: "LLDAP wrote no SQLite database, so MariaDB is its only store"
+
+        - name: Show the LLDAP verification summary
+          ansible.builtin.debug:
+            msg:
+              - "LLDAP systemd: {% for unit, state in lldap_verify_units | zip(lldap_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
+              - "LLDAP version: {{ lldap_version_reported.stdout }}"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.
