@@ -30,6 +30,7 @@ provisioner:
       all:
         # Helper variables
         lldap_debug_service_enabled: false
+        lldap_restarts_check_enabled: true
         # The user that verify.yml creates over the GraphQL API and then looks
         # for over LDAP. It must not be one LLDAP creates by itself.
         lldap_molecule_probe_username: molecule-probe
