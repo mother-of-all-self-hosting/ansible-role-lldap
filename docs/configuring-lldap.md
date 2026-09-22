@@ -148,7 +148,7 @@ lldap_container_ldaps_host_bind_port: 6360
 ```
 
 >[!NOTE]
-> To set up LDAPS, it is necessary to install a TLS certificate and its private key with `lldap_environment_variables_lldap_ldaps_options__*` variables. See [`defaults/main.yml`](../defaults/main.yml) to check what should be configured.
+> To set up LDAPS, it is necessary to install a TLS certificate and its private key with `lldap_environment_variables_lldap_ldaps_options__*` variables. Refer to [`defaults/main.yml`](../defaults/main.yml) to check what should be configured.
 
 ### Configuring the mailer (optional)
 
@@ -194,7 +194,7 @@ Take a look at:
 
 - [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `lldap_environment_variables_additional_variables` variable
 
-See [the official documentation](https://github.com/lldap/lldap/blob/main/lldap_config.docker_template.toml) for a complete list of LLDAP's config options that you can put in `lldap_environment_variables_additional_variables`.
+Refer to [the official documentation](https://github.com/lldap/lldap/blob/main/lldap_config.docker_template.toml) for a complete list of LLDAP's config options that you can put in `lldap_environment_variables_additional_variables`.
 
 ## Installing
 
@@ -210,7 +210,7 @@ If you use the MASH playbook, the shortcut commands with the [`just` program](ht
 
 After running the command for installation, LLDAP becomes available at the specified hostname like `https://example.com`.
 
-To get started, open the URL with a web browser, and log in to the instance with the administrator account. You can create additional users (admin-privileged or not) after that via the web frontend. See [this section](https://github.com/lldap/lldap/blob/main/README.md#usage) on the documentation for details about usage, including a recommended architecture.
+To get started, open the URL with a web browser, and log in to the instance with the administrator account. You can create additional users (admin-privileged or not) after that via the web frontend. Refer to [this section](https://github.com/lldap/lldap/blob/main/README.md#usage) on the documentation for details about usage, including a recommended architecture.
 
 For a command line interface, a third party client [LLDAP-CLI](https://github.com/Zepmann/lldap-cli) is available.
 
