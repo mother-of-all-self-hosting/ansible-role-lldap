@@ -160,16 +160,16 @@ To configure it, add the following configuration to your `vars.yml` file as belo
 # Set to `true` if mailer is enabled
 lldap_environment_variables_smtp_enabled: true
 
-# Specify the hostname of the SMTP server
+# Specify SMTP server hostname
 lldap_environment_variables_smtp_host: ""
 
-# Specify the port number of the SMTP server
+# Specify SMTP server port number
 lldap_environment_variables_smtp_port: 587
 
-# Specify the username for the SMTP server
+# Specify SMTP server username
 lldap_environment_variables_smtp_user: ""
 
-# Specify the password for the SMTP server
+# Specify SMTP server password
 lldap_environment_variables_smtp_password: ""
 
 # Specify the email address that emails will be sent from
