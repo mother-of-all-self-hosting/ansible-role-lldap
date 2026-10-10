@@ -157,7 +157,7 @@ You can configure a SMTP mailer to enable it for sending password reset emails.
 To configure it, add the following configuration to your `vars.yml` file as below (adapt to your needs):
 
 ```yaml
-# Set to `true` if mailer is enabled
+# Set to `true` to enable mailer
 lldap_environment_variables_smtp_enabled: true
 
 # Specify SMTP server hostname
