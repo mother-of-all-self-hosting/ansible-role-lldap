@@ -82,11 +82,10 @@ lldap_environment_variables_lldap_key_seed: RANDOM_STRING_HERE
 
 ### Set administrator's account details
 
-It is necessary to create an initial user with admin privileges by adding the following configuration to your `vars.yml` file:
+You also need to specify administrator's account details by adding the following configuration to your `vars.yml` file:
 
 ```yaml
 lldap_environment_variables_lldap_ldap_user_dn: ADMIN_USER_USERNAME_HERE
-
 lldap_environment_variables_lldap_ldap_user_pass: ADMIN_USER_PASSWORD_HERE
 ```
 
