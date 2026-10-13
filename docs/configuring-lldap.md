@@ -209,7 +209,7 @@ If you use the MASH playbook, the shortcut commands with the [`just` program](ht
 
 After running the command for installation, LLDAP becomes available at the specified hostname like `https://example.com`.
 
-To get started, open the URL with a web browser, and log in to the instance with the administrator account. You can create additional users (admin-privileged or not) after that via the web frontend. Refer to [this section](https://github.com/lldap/lldap/blob/main/README.md#usage) on the documentation for details about usage, including a recommended architecture.
+To get started, open the URL with a web browser, and log in to the instance with the administrator account. You can create additional users (admin-privileged or not) after that via the web frontend. Refer to [this section](https://github.com/lldap/lldap/blob/main/README.md#usage) on the documentation for details about the usage, including a recommended architecture.
 
 For a command line interface, a third party client [LLDAP-CLI](https://github.com/Zepmann/lldap-cli) is available.
 
