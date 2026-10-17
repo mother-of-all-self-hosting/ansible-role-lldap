@@ -98,7 +98,7 @@ The password is used both for the LDAP bind and for the administration interface
 
 #### Specify database (optional)
 
-You can specify a database used by LLDAP. By default it is configured to use SQLite, and the SQLite database is stored in the directory specified with `lldap_data_path`.
+You can specify a database used by LLDAP. By default it is configured to use SQLite. The SQLite database is stored in the directory specified with `lldap_data_path`.
 
 To use Postgres, add the following configuration to your `vars.yml` file:
 
