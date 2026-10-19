@@ -252,7 +252,7 @@ lldap_container_cleanup_command: |
 
 # Specify a database driver to use
 # Valid values: mysql, postgres, sqlite
-lldap_database_type: sqlite
+lldap_database_type: ""
 
 # Specify database configuration
 lldap_database_filename: "data/users.db"

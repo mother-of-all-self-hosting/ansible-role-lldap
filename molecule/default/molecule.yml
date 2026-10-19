@@ -52,6 +52,7 @@ provisioner:
         lldap_container_labels_traefik_enabled: false
         lldap_container_http_host_bind_port: 17170
         lldap_container_ldap_host_bind_port: 3890
+        lldap_database_type: sqlite
         lldap_environment_variables_lldap_jwt_secret: jwtsecret
         lldap_environment_variables_lldap_key_seed: keyseed
         lldap_environment_variables_lldap_ldap_user_dn: username

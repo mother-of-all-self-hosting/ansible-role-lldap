@@ -32,7 +32,7 @@ See the project's [documentation](https://github.com/lldap/lldap/blob/main/READM
 
 ## Prerequisites
 
-To run a LLDAP instance it is necessary to prepare a database. You can use a [MySQL](https://www.mysql.com/) compatible database server, [Postgres](https://www.postgresql.org/), or [SQLite](https://www.sqlite.org/). By default it is configured to use SQLite.
+To run a LLDAP instance it is necessary to prepare a database. You can use a [MySQL](https://www.mysql.com/) compatible database server, [Postgres](https://www.postgresql.org/), or [SQLite](https://www.sqlite.org/).
 
 If you are looking for Ansible roles for a MySQL compatible server or Postgres, you can check out [ansible-role-mariadb](https://github.com/mother-of-all-self-hosting/ansible-role-mariadb) and [ansible-role-postgres](https://github.com/mother-of-all-self-hosting/ansible-role-postgres), both of which are maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
 
@@ -96,9 +96,9 @@ The password is used both for the LDAP bind and for the administration interface
 
 ### Configuring database
 
-#### Specify database (optional)
+#### Specify database
 
-You can specify a database used by LLDAP. By default it is configured to use SQLite. The SQLite database is stored in the directory specified with `lldap_data_path`.
+LLDAP can use either a MySQL compatible database, Postgres, or SQLite, and you need to choose one.
 
 To use Postgres, add the following configuration to your `vars.yml` file:
 
@@ -106,9 +106,10 @@ To use Postgres, add the following configuration to your `vars.yml` file:
 lldap_database_type: postgres
 ```
 
-Set `mysql` to use a MySQL compatible database.
+Set `mysql` to use a MySQL compatible database and `sqlite` to use SQLite, respectively. The SQLite database is stored in the directory specified with `lldap_data_path`.
 
-For other settings, check variables such as `lldap_database_mysql_*` and `lldap_database_postgres_*` on [`defaults/main.yml`](../defaults/main.yml).
+>[!NOTE]
+> If you (or your playbook) have not specified a MySQL compatible database or Postgres explicitly, the database for your existing installation is most likely to be `sqlite`.
 
 #### Configuring connection to the database server (optional)
 

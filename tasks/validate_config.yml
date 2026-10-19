@@ -27,6 +27,7 @@
     - lldap_hostname
     - lldap_path_prefix
     - lldap_container_network
+    - lldap_database_type
     - lldap_environment_variables_lldap_jwt_secret
     - lldap_environment_variables_lldap_key_seed
 
