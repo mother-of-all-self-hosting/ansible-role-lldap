@@ -108,7 +108,7 @@ lldap_database_type: postgres
 
 Set `mysql` to use a MySQL compatible database.
 
-For other settings, check variables such as `lldap_database_postgres_*` and `lldap_database_mysql_*` on [`defaults/main.yml`](../defaults/main.yml).
+For other settings, check variables such as `lldap_database_mysql_*` and `lldap_database_postgres_*` on [`defaults/main.yml`](../defaults/main.yml).
 
 #### Configuring connection to the database server (optional)
 
