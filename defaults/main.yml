@@ -289,7 +289,7 @@ lldap_database_postgres_socket_path_host: ""
 lldap_database_postgres_socket_path_container: /run-postgres
 
 lldap_environment_variables_lldap_database_url_mysql: |-
-  mysql://{{ lldap_database_mysql_username }}:{{ lldap_database_mysql_password }}@
+  mysql://{{ lldap_database_mysql_username | urlencode | replace('/', '%2F') }}:{{ lldap_database_mysql_password | urlencode | replace('/', '%2F') }}@
   {%- if lldap_database_mysql_socket_enabled -%}
   localhost/{{ lldap_database_name }}?socket={{ lldap_database_mysql_socket_path_container + '/mysqld.sock' }}
   {%- else -%}
@@ -297,7 +297,7 @@ lldap_environment_variables_lldap_database_url_mysql: |-
   {%- endif -%}
 
 lldap_environment_variables_lldap_database_url_postgres: |-
-  postgres://{{ lldap_database_postgres_username }}:{{ lldap_database_postgres_password }}@
+  postgres://{{ lldap_database_postgres_username | urlencode | replace('/', '%2F') }}:{{ lldap_database_postgres_password | urlencode | replace('/', '%2F') }}@
   {%- if lldap_database_postgres_socket_enabled -%}
   localhost/{{ lldap_database_name }}?host={{ lldap_database_postgres_socket_path_container }}
   {%- else -%}
