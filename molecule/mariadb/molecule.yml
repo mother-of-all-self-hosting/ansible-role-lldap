@@ -62,8 +62,8 @@ provisioner:
 
         # Variables required for LLDAP to connect to the MariaDB database (via Unix socket)
         lldap_database_type: mysql
-        lldap_database_mysql_username: my_database_username
-        lldap_database_mysql_password: my_database_password
+        lldap_database_mysql_username: /#@my_database_username?%
+        lldap_database_mysql_password: /#@my_database_password?%
         lldap_database_name: lldap
         lldap_database_mysql_socket_enabled: true
         lldap_database_mysql_socket_path_host: "{{ mariadb_run_path }}"
